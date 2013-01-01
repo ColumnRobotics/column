@@ -1,4 +1,4 @@
-control_gains: {p: 3.0, d: 1.0, p_yaw: 0.0, d_yaw: 0.0}
+control_gains: {p: 4.0, d: 1.0, p_yaw: 0.0, d_yaw: 0.0}
 # Controls for search pattern sequence
 land_time: 20.0
 start_time: 5.0
@@ -16,11 +16,19 @@ filtered_detect: 0
 # X Y Z is RIGHT FORWARDS UP
 filtered_tag_x: 0.0
 filtered_tag_y: 0.0
+filtered_tag_z: 0.0
 filtered_tag_yaw: 0.0
+# Quad pose at most recent update
+pose_last_tagupdate_x: 0.0
+pose_last_tagupdate_y: 0.0
+pose_last_tagupdate_z: 0.0
+pose_last_tagupdate_yaw: 0.0
+pose_last_tagupdate_time: 0.0
+
 # Values that force negative Z or zero velocity
 land_now: 0
 zero_vel: 0
 # April-tag Filtering related
 ransac_inlier_threshold: 0.1
-pose_filter_min_points: 4 # Originally 10
+pose_filter_min_points: 5 # Originally 10
 pose_filter_covariance_threshold: 0.4  # Orig. 0.3: Must be less than or equal

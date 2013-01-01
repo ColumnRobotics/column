@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 
-def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
+def command_path(start_setpoint, end_setpoint, speed_mps=1.0, tag_seen=False):
     """
     Setpoints as (x, y) tuples to be sent to /?_rel_setpoint parameter
     """
@@ -28,12 +28,13 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
     for i in range(len(x_array)):
         # Apply setpoint parameters at 10 Hz
         
-        # Home in on tag then land instead, if tag detected
-        if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
-            return
+        # Home in on tag then land instead, if initial tag detection occurs
+        if not tag_seen and rospy.get_param('/filtered_detect') == 1: return
+
         rospy.set_param('/x_rel_setpoint', float(x_array[i])) 
         rospy.set_param('/y_rel_setpoint', float(y_array[i]))
         time.sleep(0.1)
+
 
 def land_now():
     rospy.loginfo("Landing Now")
@@ -41,58 +42,89 @@ def land_now():
     time.sleep(2.5)
     rospy.spin() # Do nothing until node closes
 
-def cone_search():
+
+class waypoint_gen():
+    """Iterates through waypoints with following syntax
+            for x,y in waypoint_gen:
+
+        next(waypoint_gen) also works"""
+
+    def __init__(self, dx=0.5, dy=0.6, max_iter=8,start_x=0.0, start_y=0.0):
+        self.dx = dx
+        self.dy = dy
+        self.x = start_x
+        self.y = start_y
+        self.current_iter = 0
+        self.max_iter = max_iter
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.next
+    
+    def next(self): # Python 3: def __next__(self)
+        self.current_iter += 1
+        if self.current_iter > self.max_iter:
+            raise StopIteration
+        else:
+            # Alternate updating X and Y (X first)
+            if (self.current_iter+1) % 2 == 0:
+                if self.x <= 0: self.x = self.dx
+                else:           self.x = -self.dx
+            
+            if self.current_iter % 2 == 0:
+                self.y += self.dy
+
+            return (self.x, self.y)
+
+
+def lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0):
     '''
-    Main function.
+    perform foward lawmower search pattern to coordinates:
+        x = 0.0 +/- dx  (alternating)
+        y = y + dy      (increasing)
+    
+    X Y Z here is RIGHT FORWARDS UP    (mavros frame X, Y is negative)
     '''
 
-    # Forward expanding cone search path (forward 2.4m, out +/- 0.9m)
-    # X Y Z here is RIGHT FORWARDS UP    (mavros frame X, Y is negative)
-    '''
-    xy_setpoints = [( 0.0,  0.0),
-                    ( 0.3,  0.5),
-                    (-0.3,  0.5),
-                    (-0.6,  1.0),
-                    ( 0.6,  1.0),
-                    ( 0.9,  1.5),
-                    ( -0.9, 1.5),
-                    ( -0.9, 2.0),
-                    ( 0.9,  2.0)]
-    '''
-    dy = 0.6
-    xy_setpoints = [( 0.0,  0.0 * dy),
-                    ( 0.5,  0.0 * dy),
-                    ( 0.5,  1.0 * dy),
-                    (-0.5,  1.0 * dy),
-                    (-0.5,  2.0 * dy),
-                    ( 0.5,  2.0 * dy),
-                    ( 0.5,  3.0 * dy),
-                    (-0.5,  3.0 * dy),
-                    (-0.5,  4.0 * dy)]
+    # Abort if april tag already detected
+    if rospy.get_param('/filtered_detect') == 1: return
+
+    wp_gen = waypoint_gen(dx=0.5, dy=0.6, max_iter=8)
 
     # Visit each setpoint
-    for i in range(len(xy_setpoints)-1):
-        #LAST-MINUTE CHANGE HERE: changed tag_detect to filtered_detect
-        if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
-            return
-        rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
-                                                      xy_setpoints[i+1][1]) 
-        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.1)
-        #LAST-MINUTE CHANGE HERE: Allow break out before 2 second sleep
-        if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
-            return
-        time.sleep(2)
+    last_setpoint = (0.0, 0.0)
+    for setpoint in wp_gen:
+        rospy.loginfo("Setting new waypoint: %f, %f", setpoint[0],setpoint[1])
+        command_path(last_setpoint, setpoint, speed_mps=speed_mps)
+
+        if rospy.get_param('/filtered_detect') == 1:  return
+        last_setpoint = setpoint
+        time.sleep(waypoint_delay_s)
 
 def center_on_dock():
     #update_time = rospy.get_param('/pose_last_tagupdate_time')
     if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
         rospy.loginfo("Homing in on April Tag!!")
-        new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') - rospy.get_param('/filtered_tag_x') - rospy.get_param('/x_init')
-        new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') - rospy.get_param('/filtered_tag_y') - rospy.get_param('/y_init')
-        new_rel_setpoint_yaw = 0.0*(rospy.get_param('/pose_last_tagupdate_yaw') + rospy.get_param('/filtered_tag_yaw') - rospy.get_param('yaw_init'))
-        rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
-        rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
-        rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
+
+        # Acqire and calculate new desired setpoints from tag
+        new_rel_setpoint_x = (rospy.get_param('/pose_last_tagupdate_x') 
+                              - rospy.get_param('/filtered_tag_x')
+                              - rospy.get_param('/x_init'))
+        new_rel_setpoint_y = (rospy.get_param('/pose_last_tagupdate_y')
+                              - rospy.get_param('/filtered_tag_y')
+                              - rospy.get_param('/y_init'))
+        new_rel_setpoint_yaw = 0.0*(rospy.get_param('/pose_last_tagupdate_yaw') 
+                                    + rospy.get_param('/filtered_tag_yaw')
+                                    - rospy.get_param('yaw_init'))
+
+        # Actually command the path, without aborting on tag sightings
+        current_setpoint = (rospy.get_param('/x_rel_setpoint'), 
+                            rospy.get_param('/y_rel_setpoint'))
+        command_path(current_setpoint, (new_rel_setpoint_x, new_rel_setpoint_y),
+                     speed_mps=0.2, tag_seen=True)
+
 
 if __name__ == '__main__':
     # Initialize the node and name it.
@@ -108,8 +140,10 @@ if __name__ == '__main__':
             break
     rospy.set_param('/filtered_detect', 0)
     rospy.set_param('/tag_detect', 0)
-    rospy.loginfo("Begin Cone Search")
-    cone_search()
+
+    rospy.loginfo("Begin Search")
+    lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0)
+    # Returns when april tag has been detected
     time.sleep(2) # Pause
     rospy.loginfo("Move to pre-dock")
     center_on_dock() 
@@ -119,6 +153,12 @@ if __name__ == '__main__':
     rospy.loginfo("Land")
     rospy.set_param('/land_now', 1)
     while not rospy.is_shutdown():
+        # Hover once below 1m above dock
+        if rospy.get_param('/filtered_tag_z') < 1.0:
+            # Z in these frames is 0 at initial height - will be negative here
+            rospy.loginfo("Hovering!")
+            rospy.set_param('/z_rel_setpoint', rospy.get_param('/pose_last_tagupdate_z'))
+            rospy.set_param('/land_now', 0)
         time.sleep(0.3)
         center_on_dock() # move to predock
 
