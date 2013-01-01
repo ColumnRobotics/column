@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
-    int publish_skip = 40; //Publish only every 2 seconds
+    int publish_skip = 5*20; //Publish only every 2 seconds
     int publish_idx = 0;
     
     float avg_april_pose_x = 0.0; 
@@ -126,8 +126,8 @@ int main(int argc, char **argv)
 
 	publish_idx++;
         if((publish_idx % publish_skip) == 0){
-        ref_pose.pose.position.x = current_position.pose.position.x - avg_april_pose_x/100; //CHECK UNITs
-        ref_pose.pose.position.y = current_position.pose.position.y + avg_april_pose_y/100;
+        ref_pose.pose.position.x = current_position.pose.position.x - avg_april_pose_x*2.54/100; //CHECK UNITs
+        ref_pose.pose.position.y = current_position.pose.position.y + avg_april_pose_y*2.54/100;
         ref_pose.pose.position.z = current_position.pose.position.z; //+ tag_position.position.z/100;
 /*	ROS_INFO("Ref-X:%f Ref-Y:%f Ref-Z:%f", ref_pose.pose.position.x, 
            ref_pose.pose.position.y, 
