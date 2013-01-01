@@ -6,11 +6,12 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Pose.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 
-bool flag = true;
+bool flag = false;
 
 mavros_msgs::State current_state;
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
@@ -22,6 +23,10 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     current_position = *pose;
 }
 
+geometry_msgs::Pose tag_position;
+void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
+    tag_position = *pose;
+}
 
 int main(int argc, char **argv)
 {
@@ -30,6 +35,8 @@ int main(int argc, char **argv)
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
+    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::Pose>
+            ("april_pose", 10, tag_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
     ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
@@ -47,11 +54,19 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
+
     geometry_msgs::PoseStamped zero_pose;
+    zero_pose.pose.position.x = current_position.pose.position.x;
+    zero_pose.pose.position.y = current_position.pose.position.y;
+    zero_pose.pose.position.z = current_position.pose.position.z;
+
     geometry_msgs::PoseStamped ref_pose;
-    ref_pose.pose.position.x = current_position.pose.position.x;
-    ref_pose.pose.position.y = current_position.pose.position.y;
-    ref_pose.pose.position.z = current_position.pose.position.z;
+    ROS_INFO("X:%f, Y:%f, Z:%f", current_position.pose.position.x,
+    	current_position.pose.position.y,
+	current_position.pose.position.z);
+    ref_pose.pose.position.x = current_position.pose.position.x + tag_position.position.x/100; //CHECK UNITs
+    ref_pose.pose.position.y = current_position.pose.position.y + tag_position.position.y/100;
+    ref_pose.pose.position.z = current_position.pose.position.z + tag_position.position.z/100;
 
     //send a few setpoints before starting
     for(int i = 100; ros::ok() && i > 0; --i){
@@ -69,14 +84,15 @@ int main(int argc, char **argv)
     ros::Time last_request = ros::Time::now();
 
     while(ros::ok()){
+/*
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
             if( set_mode_client.call(offb_set_mode) &&
                 offb_set_mode.response.success){
                 ROS_INFO("Offboard enabled");
-		zero_pose.pose.position.x = current_position.pose.position.x;
-        	zero_pose.pose.position.y = current_position.pose.position.y;
-        	zero_pose.pose.position.z = current_position.pose.position.z;
+		//ref_pose.pose.position.x = current_position.pose.position.x;
+        	//ref_pose.pose.position.y = current_position.pose.position.y;
+        	//ref_pose.pose.position.z = current_position.pose.position.z;
             }
             last_request = ros::Time::now();
         } else {
@@ -89,11 +105,27 @@ int main(int argc, char **argv)
                 last_request = ros::Time::now();
             }
         }
+	if(!flag){
+		ref_pose.pose.position.x = - 100;
+    		ref_pose.pose.position.y = current_position.pose.position.y;
+    		ref_pose.pose.position.z = current_position.pose.position.z;
+		flag = true;
+	}
+*/
+	 //zero_pose.pose.position.x = current_position.pose.position.x;
+         //zero_pose.pose.position.y = current_position.pose.position.y;
+         //zero_pose.pose.position.z = current_position.pose.position.z;
 
+        ref_pose.pose.position.x = 100 + current_position.pose.position.x + tag_position.position.x/100; //CHECK UNITs
+        ref_pose.pose.position.y = current_position.pose.position.y + tag_position.position.y/100;
+        ref_pose.pose.position.z = current_position.pose.position.z + tag_position.position.z/100;
         local_pos_pub.publish(ref_pose);
-	ROS_INFO("X:%f Y:%f Z:%f", ref_pose.pose.position.x - current_position.pose.position.x, 
-           ref_pose.pose.position.y - current_position.pose.position.y, 
-           ref_pose.pose.position.z - current_position.pose.position.z);
+/*	ROS_INFO("Ref-X:%f Ref-Y:%f Ref-Z:%f", ref_pose.pose.position.x, 
+           ref_pose.pose.position.y, 
+           ref_pose.pose.position.z);*/
+	ROS_INFO("Tag-X:%f Tag-Y:%f Tag-Z:%f", tag_position.position.x,
+	   tag_position.position.y,
+	   tag_position.position.z);
 
         ros::spinOnce();
         rate.sleep();
