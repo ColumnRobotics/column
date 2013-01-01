@@ -18,6 +18,8 @@
 bool flag = false;
 
 mavros_msgs::State current_state;
+geometry_msgs::PoseStamped initial_position;
+
 void state_cb(const mavros_msgs::State::ConstPtr& msg)
 {
     current_state = *msg;
@@ -29,16 +31,36 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
     current_position = *pose;
 }
 
-geometry_msgs::Pose camera_position_in_tag_frame;
+geometry_msgs::PoseStamped camera_position_in_tag_frame;
+geometry_msgs::PoseStamped camera_position_in_tag_frame_with_offset;
+ros::Publisher ekf_pub;
 double current_position_at_last_tag_frame_x;
 double current_position_at_last_tag_frame_y;
+double current_position_at_last_tag_frame_z;
 void tag_cb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pose)
 {
-    // Get the tag position in the camera frame
+    /*/ Get the tag position in the camera frame
     camera_position_in_tag_frame = pose->pose.pose;
     // Get the current position each call back
     current_position_at_last_tag_frame_x = current_position.pose.position.x;
     current_position_at_last_tag_frame_y = current_position.pose.position.y;
+    */
+}
+
+void unfiltered_tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
+{
+    // Get the tag position in the camera frame
+    camera_position_in_tag_frame_with_offset = *pose;
+    // Get the current position each call back
+    current_position_at_last_tag_frame_x = current_position.pose.position.x;
+    current_position_at_last_tag_frame_y = current_position.pose.position.y;
+    current_position_at_last_tag_frame_z = current_position.pose.position.z;
+    camera_position_in_tag_frame_with_offset.pose.position.x = initial_position.pose.position.x + pose->pose.position.x;
+    camera_position_in_tag_frame_with_offset.pose.position.y = initial_position.pose.position.y + pose->pose.position.y;
+    camera_position_in_tag_frame_with_offset.pose.position.z = current_position.pose.position.z;
+    if(current_state.mode == "OFFBOARD"){
+        ekf_pub.publish(camera_position_in_tag_frame_with_offset);
+    }
 }
 
 float getYaw(geometry_msgs::Pose pose)
@@ -65,6 +87,10 @@ double normalize_angle(double angle)
 
 int main(int argc, char **argv)
 {
+    initial_position.pose.position.x = 0;
+    initial_position.pose.position.y = 0;
+    initial_position.pose.position.z = 0;
+
     ros::init(argc, argv, "offb_node");
     ros::NodeHandle nh;
 
@@ -72,8 +98,12 @@ int main(int argc, char **argv)
             ("mavros/state", 10, state_cb);
     ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>
             ("filtered_pose", 10, tag_cb);
+    ros::Subscriber unfiltered_tag_sub = nh.subscribe<geometry_msgs::PoseStamped>
+            ("rectified_pose", 10, unfiltered_tag_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
+    ekf_pub = nh.advertise<geometry_msgs::PoseStamped>
+            ("mavros/vision_pose/pose", 10);
 
     ros::Publisher set_vel_pub = nh.advertise<geometry_msgs::TwistStamped>
             ("mavros/setpoint_velocity/cmd_vel", 10);
@@ -131,7 +161,7 @@ int main(int argc, char **argv)
 
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
-    geometry_msgs::PoseStamped initial_position = current_position;
+    initial_position = current_position;
     float des_yaw = getYaw(current_position.pose);
     float initial_yaw = des_yaw;
     ros::param::set("/x_init",     -initial_position.pose.position.x);
@@ -175,9 +205,9 @@ int main(int argc, char **argv)
 	    des_position.pose.position.z = initial_position.pose.position.z + z_rel_setpoint;
 
         // TODO: Remove NEXT 3 LINES ONLY FOR TESTING
-	    des_position.pose.position.x = 0;
-	    des_position.pose.position.y = 0;
-	    des_position.pose.position.z = 1;
+	    des_position.pose.position.x = initial_position.pose.position.x;
+	    des_position.pose.position.y = initial_position.pose.position.y;
+	    des_position.pose.position.z = initial_position.pose.position.z;
  
         des_yaw = normalize_angle(normalize_angle(initial_yaw) + normalize_angle(yaw_rel_setpoint));
         curr_yaw = getYaw(current_position.pose);

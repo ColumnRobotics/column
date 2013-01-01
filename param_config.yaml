@@ -1,4 +1,4 @@
-control_gains: {p: 4.0, d: 1.0, p_yaw: 0.0, d_yaw: 0.0}
+control_gains: {p: 0.5, d: 0.0, p_yaw: 0.0, d_yaw: 0.0}
 max_xy_vel: 0.5
 # Controls for search pattern sequence
 land_time: 20.0
