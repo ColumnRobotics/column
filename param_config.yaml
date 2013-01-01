@@ -31,4 +31,4 @@ zero_vel: 0
 # April-tag Filtering related
 ransac_inlier_threshold: 0.1
 pose_filter_min_points: 5 # Originally 10
-pose_filter_covariance_threshold: 0.4  # Orig. 0.3: Must be less than or equal
+pose_filter_covariance_threshold: 0.3  # Orig. 0.3: Must be less than or equal

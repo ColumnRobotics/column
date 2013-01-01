@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 	      if(land_now > 0){
               //twist_pub.twist.linear.x = 0.0;
               //twist_pub.twist.linear.y = 0.0;
-              twist_pub.twist.linear.z = -0.5;
+              twist_pub.twist.linear.z = -0.2;
 	      }	
 	      if(zero_vel > 0){twist_pub = twist_zero;}
 

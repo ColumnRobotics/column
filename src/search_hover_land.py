@@ -152,7 +152,9 @@ if __name__ == '__main__':
     
     time.sleep(2) # Pause 
     rospy.loginfo("Move to pre-dock")
-    center_on_dock(interpolate=True) 
+    center_on_dock(interpolate=True)
+    rospy.set_param('/control_gains/p', 1.5) # Reduce gains for more gentle movement
+    rospy.set_param('/control_gains/d', 0.5)
     time.sleep(2) # Pause 
     # Hold position over april tag for 3 seconds
     for _ in range(6):
