@@ -122,6 +122,14 @@ int main(int argc, char **argv)
         rate.sleep();
     }
 
+    //Initial values for last error, derr
+    float last_error_x = 0.0;
+    float last_error_y = 0.0;
+    float last_error_z = 0.0;
+    float derr_x = 0.0;
+    float derr_y = 0.0;
+    float derr_z = 0.0;
+
    
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
@@ -135,25 +143,18 @@ int main(int argc, char **argv)
 
 	    // Load gains and flight path parameters
 	    float kp, kd;
-	    ros::param::get("/control_gains/p", kp);
-	    ros::param::get("/control_gains/d", kd);
-
-	    float last_error_x = 0.0;
-	    float last_error_y = 0.0;
-	    float last_error_z = 0.0;
-	    float derr_x = 0.0;
-	    float derr_y = 0.0;
-	    float derr_z = 0.0;
+	    ros::param::getCached("/control_gains/p", kp);
+	    ros::param::getCached("/control_gains/d", kd);
 
 	    float x_rel_setpoint, y_rel_setpoint, z_rel_setpoint, theta_rel_setpoint;
-	    ros::param::get("/x_rel_setpoint",      x_rel_setpoint);
-	    ros::param::get("/y_rel_setpoint",      y_rel_setpoint);
-	    ros::param::get("/z_rel_setpoint",      z_rel_setpoint);
-	    ros::param::get("/theta_rel_setpoint",  theta_rel_setpoint);
+	    ros::param::getCached("/x_rel_setpoint",      x_rel_setpoint);
+	    ros::param::getCached("/y_rel_setpoint",      y_rel_setpoint);
+	    ros::param::getCached("/z_rel_setpoint",      z_rel_setpoint);
+	    ros::param::getCached("/theta_rel_setpoint",  theta_rel_setpoint);
 	   
 	    int land_now, zero_vel;
-	    ros::param::get("/land_now", land_now);
-	    ros::param::get("/zero_vel", zero_vel);
+	    ros::param::getCached("/land_now", land_now);
+	    ros::param::getCached("/zero_vel", zero_vel);
 
 
 		//TODO: Add controller for Z angular velocity (theta)
