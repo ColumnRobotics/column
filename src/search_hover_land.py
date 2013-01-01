@@ -91,7 +91,7 @@ def lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0):
     # Abort if april tag already detected
     if rospy.get_param('/filtered_detect') == 1: return
 
-    wp_gen = waypoint_gen(dx=0.5, dy=0.6, max_iter=8)
+    wp_gen = waypoint_gen(dx=dx, dy=dy, max_iter=8)
 
     # Visit each setpoint
     last_setpoint = (0.0, 0.0)
