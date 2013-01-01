@@ -192,7 +192,7 @@ int main(int argc, char **argv)
           //Clamp x and y to +/- max_xy_vel
 	      twist_pub.twist.linear.x = std::max(std::min(kp * error_x  +  kd * derr_x, max_xy_vel), -max_xy_vel);
 	      twist_pub.twist.linear.y = std::max(std::min(kp * error_y  +  kd * derr_y, max_xy_vel), -max_xy_vel);
-	      twist_pub.twist.linear.z = 0.5*(kp * error_z  +  kd * derr_z);
+	      twist_pub.twist.linear.z = kp * error_z  +  kd * derr_z;
           twist_pub.twist.angular.z = kp_yaw * error_yaw + kd_yaw * derr_yaw;
 	      last_error_x = error_x;
 	      last_error_y = error_y;
@@ -200,8 +200,8 @@ int main(int argc, char **argv)
           last_error_yaw = error_yaw;
 
 	      // Overwrite Z velocity if time to land or stop control
-	      if(zero_vel > 0){twist_pub.twist.linear.z = 0.0;} // twist_zero;}
-	      if(land_now > 0){
+	      if(zero_vel > 0.1){twist_pub.twist.linear.z = 0.0;} // twist_zero;}
+	      if(land_now > 0.1){
               //twist_pub.twist.linear.x = 0.0;
               //twist_pub.twist.linear.y = 0.0;
               float land_z_vel;
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
 		publish_idx++;
 		if(publish_idx % publish_skip == 0){ 
 			ROS_INFO("Time (s): %f", time);
-			//ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f wz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z, twist_pub.twist.angular.z);
+			ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f wz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z, twist_pub.twist.angular.z);
 			ROS_INFO("Current Pos:  x:%f  y:%f  z:%f yaw:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z, curr_yaw);
 			ROS_INFO("Desired Pos:  x:%f  y:%f  z:%f yaw:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z, des_yaw);
 		}

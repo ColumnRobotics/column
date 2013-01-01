@@ -49,9 +49,10 @@ class waypoint_gen():
 
         next(waypoint_gen) also works"""
 
-    def __init__(self, dx=0.5, dy=0.6, max_iter=8,start_x=0.0, start_y=0.0):
+    def __init__(self, dx=0.5, dy=0.6, cone_scale=None, max_iter=8,start_x=0.0, start_y=0.0):
         self.dx = dx
         self.dy = dy
+        self.cone_scale = cone_scale
         self.x = start_x
         self.y = start_y
         self.current_iter = 0
@@ -75,11 +76,14 @@ class waypoint_gen():
             
             if self.current_iter % 2 == 0:
                 self.y += self.dy
+            
+            if self.cone_scale is not None: # Slowly scale up +/- x by cone_scale value
+                self.x *= min(1.0, self.cone_scale * (self.current_iter-1 / 2.0))
 
             return (self.x, self.y)
 
 
-def lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0):
+def lawnmower_search(dx=0.5, dy=0.6,cone_scale=None, speed_mps=0.1, waypoint_delay_s=1.0):
     '''
     perform foward lawmower search pattern to coordinates:
         x = 0.0 +/- dx  (alternating)
@@ -91,7 +95,7 @@ def lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0):
     # Abort if april tag already detected
     if rospy.get_param('/filtered_detect') == 1: return
 
-    wp_gen = waypoint_gen(dx=dx, dy=dy, max_iter=8)
+    wp_gen = waypoint_gen(dx=dx, dy=dy,cone_scale=cone_scale, max_iter=8)
 
     # Visit each setpoint
     last_setpoint = (0.0, 0.0)
@@ -154,20 +158,27 @@ if __name__ == '__main__':
     rospy.set_param('/tag_detect', 0)
 
     rospy.loginfo("Begin Search")
-    lawnmower_search(dx=0.7, dy=0.6, speed_mps=0.15, waypoint_delay_s=1.0)
+    lawnmower_search(dx=0.7, dy=0.6, cone_scale=None, speed_mps=0.15, waypoint_delay_s=1.0)
     # Returns when april tag has been detected
     
     time.sleep(2) # Pause 
     rospy.loginfo("Move to pre-dock")
     initial_center = center_on_dock(interpolate=True)
-    rospy.set_param('/max_xy_vel', 0.5)
     #rospy.set_param('/control_gains/p', 7)
     #rospy.set_param('/control_gains/d', 2)
     time.sleep(2) # Pause 
     # Hold position over april tag for 5 seconds
-    for _ in range(3):#was 5
+    last_center = (0.0,0.0)
+    for _ in range(40):#was 5
         initial_center = center_on_dock(last_center=initial_center) 
-        time.sleep(1)
+        if ((last_center[0] - initial_center[0] < 0.15) and
+            (last_center[1] - initial_center[1] < 0.15) and
+            (-0.2 < initial_center[0] < 0.2) and (-0.2 < initial_center[1] < 0.2) and
+            last_center != initial_center):
+            rospy.loginfo(" ##### Consistent Measurements!  Landing now! #####")
+            break
+        last_center = initial_center
+        time.sleep(0.25)
 
     rospy.loginfo("!!!!!!!!Land!!!!!!!!\n")
     rospy.set_param('/land_now', 1)
