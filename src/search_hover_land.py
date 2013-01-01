@@ -24,7 +24,7 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
     # Create interpolated position arrays with 10 * duration(seconds) points
     x_array = np.linspace(start_setpoint[0], end_setpoint[0], duration_s*10.0);
     y_array = np.linspace(start_setpoint[1], end_setpoint[1], duration_s*10.0);
-    
+    epsilon = 0.001
     for i in range(len(x_array)):
         # Apply setpoint parameters at 10 Hz
         
@@ -47,6 +47,8 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         '''
         if rospy.get_param('/tag_detect') == 1:
             while 1:
+                rospy.loginfo("Tag Detected")
+                time1 = rospy.get_param("/pose_last_tagupdate_time")
                 if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
                     rospy.loginfo("Homing in on April Tag!!")
                     new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x')
@@ -57,6 +59,10 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
                     new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x')
                     new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y')
                     new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw')
+                time2 = rospy.get_param("/pose_last_tagupdate_time")
+                if abs(time1 - time2) > epsilon:
+                    rospy.loginfo("tag times not yet equvalent") 
+                    continue
                 rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
                 rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
                 rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
@@ -111,5 +117,9 @@ if __name__ == '__main__':
     # Go to the main loop.
     # /S# with correct custom mode we can wait until it changes
     # state_sub = rospy.Subscriber(mavros.get_topic('state'), State, state_cb)
-    rospy.set_param('/yaw_rel_setpoint', 0)
+#    while(1):    
+#        rospy.set_param('/x_rel_setpoint', float(0))
+#        rospy.set_param('/y_rel_setpoint', float(0))
+#        rospy.set_param('/yaw_rel_setpoint', float(0))
     cone_search()
+
