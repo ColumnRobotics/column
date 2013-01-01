@@ -33,13 +33,13 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
     if(flag) { // Should only run once
         static tf::TransformBroadcaster local_origin_br;
         tf::Transform local_origin;
-	first_pose = curr_pose.pose;
+	    first_pose = curr_pose.pose;
         local_origin.setOrigin( tf::Vector3(curr_pose.pose.position.x, curr_pose.pose.position.y, 0) ); // Z should be zero
         tf::Quaternion q = tf::Quaternion(curr_pose.pose.orientation.x, curr_pose.pose.orientation.y,curr_pose.pose.orientation.z,curr_pose.pose.orientation.w);
         local_origin.setRotation(q);
-        local_origin_br.sendTransform(tf::StampedTransform(local_origin, ros::Time::now(), "map", "local_origin"));
-	R = tf::Matrix3x3(q); // Get the rotation matrix
-	R.getEulerYPR(old_yaw, old_pitch, old_roll);
+        local_origin_br.sendTransform(tf::StampedTransform(local_origin, ros::Time::now(), "map", "first_pose"));
+	    R = tf::Matrix3x3(q); // Get the rotation matrix
+	    R.getEulerYPR(old_yaw, old_pitch, old_roll); 
         flag = false;
     }
     tf::Quaternion q_new = tf::Quaternion(curr_pose.pose.orientation.x, curr_pose.pose.orientation.y,curr_pose.pose.orientation.z,curr_pose.pose.orientation.w);
@@ -56,14 +56,14 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
     tf::Quaternion q = tf::Quaternion();
     q.setEuler(d_yaw, d_pitch, d_roll); // YPR 
     fcu.setRotation(q);
-    fcu_br.sendTransform(tf::StampedTransform(fcu, ros::Time::now(), "local_origin", "base_footprint"));
+    fcu_br.sendTransform(tf::StampedTransform(fcu, ros::Time::now(), "map", "base_footprint"));
 
     odom.pose.pose.position.x = pose->pose.position.x;
     odom.pose.pose.position.y = pose->pose.position.y;
     odom.pose.pose.position.z = 0; // Z should be zero
     odom.pose.pose.orientation = pose->pose.orientation;
     odom.child_frame_id = "base_footprint";
-    odom.header.frame_id = "local_origin";
+    odom.header.frame_id = "map";
     odom.twist.twist.linear.x = 0;
     odom.twist.twist.linear.y = 0;
     odom.twist.twist.angular.z = 0;

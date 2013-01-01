@@ -5,8 +5,5 @@ footprint_padding: 0.03
 #robot_radius: ir_of_robot
 inflation_radius: 0.55
 transform_tolerance: 1
-
 observation_sources: point_cloud_sensor
-
 point_cloud_sensor: {sensor_frame: camera_rgb_frame, data_type: PointCloud2, topic: /camera/depth_registered/points, marking: true, clearing: true}
-
