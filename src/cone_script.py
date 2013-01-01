@@ -17,40 +17,38 @@ def cone_search():
     Main function.
     '''
 
-    while (not rospy.is_shutdown() and rospy.get_param('/offboard') < 1):
+    while not rospy.is_shutdown(): 
         time.sleep(0.5)
-        print "Still Waiting for Offboard"
+        if rospy.get_param('/offboard') < 1:
+            print "Still Waiting for Offboard"
+        else:
+            time.sleep(3)
+            print "Setpoint 1"
+            rospy.set_param('/x_rel_setpoint', -0.3) 
+            rospy.set_param('/y_rel_setpoint', 0) 
 
-    time.sleep(3)
-    print "Setpoint 1"
-    rospy.set_param('/x_rel_setpoint', -0.3) 
-    rospy.set_param('/y_rel_setpoint', 0) 
+            time.sleep(3)
+            rospy.set_param('/x_rel_setpoint', -0.3) 
+            rospy.set_param('/y_rel_setpoint', -0.3) 
 
-    time.sleep(3)
-    rospy.set_param('/x_rel_setpoint', -0.3) 
-    rospy.set_param('/y_rel_setpoint', -0.3) 
+            time.sleep(3)
+            print "Setpoint 3"
+            rospy.set_param('/x_rel_setpoint', 0.3) 
+            rospy.set_param('/y_rel_setpoint', -0.3) 
 
-    time.sleep(3)
-    print "Setpoint 3"
-    rospy.set_param('/x_rel_setpoint', 0.3) 
-    rospy.set_param('/y_rel_setpoint', -0.3) 
+            time.sleep(3)
+            rospy.set_param('/x_rel_setpoint', 0.3) 
+            rospy.set_param('/y_rel_setpoint', -0.6) 
 
-    time.sleep(3)
-    rospy.set_param('/x_rel_setpoint', 0.3) 
-    rospy.set_param('/y_rel_setpoint', -0.6) 
+            time.sleep(3)
+            rospy.set_param('/x_rel_setpoint', 0.0) 
+            rospy.set_param('/y_rel_setpoint', -0.6) 
 
-    time.sleep(3)
-    rospy.set_param('/x_rel_setpoint', 0.0) 
-    rospy.set_param('/y_rel_setpoint', -0.6) 
-
-    time.sleep(3)
-    print "Landing Now"
-    rospy.set_param('/land_now', 1)
-    time.sleep(2)
-    rospy.set_param('/zero_vel', 1)
-
-    rospy.spin()
-    
+            time.sleep(3)
+            print "Landing Now"
+            rospy.set_param('/land_now', 1)
+            time.sleep(2)
+            rospy.set_param('/zero_vel', 1)
 
 
 # Main function.
