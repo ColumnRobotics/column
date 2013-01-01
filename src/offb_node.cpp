@@ -61,42 +61,58 @@ int main(int argc, char **argv)
 
     // wait for FCU connection
     while(ros::ok() && current_state.connected){
+        
         ros::spinOnce();
         rate.sleep();
     }
     
+    geometry_msgs::TwistStamped twist_zero;
+    twist_zero.header.stamp = ros::Time::now();
+    twist_zero.header.frame_id = "fcu";
+    twist_zero.twist.linear.x = 0.0;
+    twist_zero.twist.linear.y = 0.0;
+    twist_zero.twist.linear.z = 0.0;
+    twist_zero.twist.angular.x = 0.0;
+    twist_zero.twist.angular.y = 0.0;
+    twist_zero.twist.angular.z = 0.0;
+
+    geometry_msgs::TwistStamped twist_x = twist_zero;
+    twist_x.twist.linear.x = 0.5;
     
-    geometry_msgs::TwistStamped command_twist;
-    ros::Time::now();
-   
-    command_twist.header.stamp = ros::Time::now();
-    command_twist.header.frame_id = "fcu";
-    command_twist.twist.linear.x = 0.0;
-    command_twist.twist.linear.y = 0.0;
-    command_twist.twist.linear.z = -0.5;
-    command_twist.twist.angular.x = 0.0;
-    command_twist.twist.angular.y = 0.0;
-    command_twist.twist.angular.z = 0.0;
-	
+    geometry_msgs::TwistStamped twist_y = twist_zero;
+    twist_y.twist.linear.y = 0.5;
+
+    geometry_msgs::TwistStamped twist_pub;
 
     //send a few setpoints before starting
-    for(int i = 100; ros::ok() && i > 0; --i){
-        set_vel_pub.publish(command_twist);
+    while(current_state.mode != "OFFBOARD" && ros::ok()){
+        set_vel_pub.publish(twist_zero);
         ros::spinOnce();
         rate.sleep();
     }
-
-
-
+    
+    ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
-
-	if(current_state.mode == "OFFBOARD"){
-        set_vel_pub.publish(command_twist);
+      float time = (ros::Time::now()-time_begin).toSec();
+      
+      if(current_state.mode == "OFFBOARD"){
+	if(time < 0){
+	  twist_pub = twist_zero;
+        }
+	else if(time < 1){
+	  twist_pub = twist_y; //was x
 	}
-
-
-        ros::spinOnce();
-        rate.sleep();
+	//else if(time < 2){
+	//  twist_pub = twist_zero;
+	//}
+	else if(time < 3){
+	  twist_pub = twist_y;
+	}
+      }
+      set_vel_pub.publish(twist_pub);
+      ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
+      ros::spinOnce();
+      rate.sleep();
     }
 
     return 0;
