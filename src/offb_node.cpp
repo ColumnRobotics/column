@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(100.0);
-    int publish_skip = 1*100; //Publish only every 2 seconds
+    int publish_skip = 50; //Publish only every 2 seconds
     int publish_idx = 0;
     
     float avg_april_pose_x = 0.0; 
@@ -135,15 +135,15 @@ int main(int argc, char **argv)
      //Set desired position sequence 
       if(time > 2){ //No changes for first 2 seconds
 	if(time < 4){
-          des_position.pose.position.x = initial_position.pose.position.x + 1.0;
+          des_position.pose.position.x = initial_position.pose.position.x + 0.5;
 	}
 	else if(time < 8){
-          des_position.pose.position.x = initial_position.pose.position.x + 1.0;
-          des_position.pose.position.y = initial_position.pose.position.y + 1.0;
+          des_position.pose.position.x = initial_position.pose.position.x + 0.5;
+          des_position.pose.position.y = initial_position.pose.position.y + 0.5;
 	}
 	else if(time < 12){
           des_position.pose.position.x = initial_position.pose.position.x + 0.0;
-          des_position.pose.position.y = initial_position.pose.position.y + 1.0;
+          des_position.pose.position.y = initial_position.pose.position.y + 0.5;
 	}
 	else if(time < 16){
           des_position.pose.position.x = initial_position.pose.position.x + 0;
@@ -164,7 +164,8 @@ int main(int argc, char **argv)
       set_vel_pub.publish(twist_pub);
 
 	//Print info at 2 hz	
-	if(publish_idx % (publish_skip/2) == 0){ 
+	publish_idx++;
+	if(publish_idx % publish_skip == 0){ 
         ROS_INFO("Time (s): %f", time);
         ROS_INFO("Cmd velocities:   vx:%f vy:%f vz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
         ROS_INFO("Position Setpoint: x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
