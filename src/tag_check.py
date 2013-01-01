@@ -10,7 +10,7 @@ import rospy
 import time
 import numpy as np
 from mavros_msgs.msg import State
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import PoseWithCovarianceStamped
 
 def april_cb(msg):
     rospy.loginfo("Tag Detected")
@@ -20,7 +20,7 @@ def april_cb(msg):
 
 def listener():
     rospy.init_node('tag_listener', anonymous=True)
-    rospy.Subscriber("filtered_pose", Pose, april_cb)
+    rospy.Subscriber("filtered_pose", PoseWithCovarianceStamped, april_cb)
     rospy.spin()
 
 if __name__ == '__main__':

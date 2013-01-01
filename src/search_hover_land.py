@@ -69,14 +69,15 @@ def cone_search():
         else:
             break
 
-    # Forward expanding cone search path (forward 1.5m, out +/- 0.9m)
+    # Forward expanding cone search path (forward 2.4m, out +/- 0.9m)
+    # NOTE that obnoxiously, +x is to the drone's LEFT, +y is to the drone's REAR
     xy_setpoints = [( 0.0,  0.0),
-                    ( 0.3, -0.5),
-                    (-0.3, -0.5),
-                    (-0.6, -1.0),
-                    ( 0.6, -1.0),
-                    ( 0.9, -1.5),
-                    ( -0.9, -1.5)]
+                    ( 0.3, -0.8),
+                    (-0.3, -0.8),
+                    (-0.6, -1.6),
+                    ( 0.6, -1.6),
+                    ( 0.9, -2.4),
+                    ( -0.9, -2.4)]
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):
