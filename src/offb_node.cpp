@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(100.0);
-    int publish_skip = 5*20; //Publish only every 2 seconds
+    int publish_skip = 2*100; //Publish only every 2 seconds
     int publish_idx = 0;
     
     float avg_april_pose_x = 0.0; 
@@ -128,10 +128,6 @@ int main(int argc, char **argv)
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
       
-	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
-	    camera_position_in_tag_frame.position.x,
-            camera_position_in_tag_frame.position.y,
-            camera_position_in_tag_frame.position.z);
 
       if(current_state.mode == "OFFBOARD"){
 	if(time < 0){
@@ -153,7 +149,16 @@ int main(int argc, char **argv)
       twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
 
       set_vel_pub.publish(twist_pub);
-      ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
+	
+	publish_idx++;
+	if(publish_idx % publish_skip == 0){ 
+        ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
+	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
+	    camera_position_in_tag_frame.position.x,
+            camera_position_in_tag_frame.position.y,
+            camera_position_in_tag_frame.position.z);
+	}
+
       ros::spinOnce();
       rate.sleep();
     }
