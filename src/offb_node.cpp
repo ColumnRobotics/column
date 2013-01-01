@@ -137,32 +137,30 @@ int main(int argc, char **argv)
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
       
-
-    /*  if(current_state.mode == "OFFBOARD"){
-	if(time < 0){
-	 // twist_pub = twist_zero;
-        }
-	else if(time < 1){
-	  //twist_pub = twist_x; //was x
-	}
-	//else if(time < 2){
-	//  twist_pub = twist_zero;
-	//}
-	else if(time < 3){
-	  //twist_pub = twist_x;b
-	}
-      }*/
       
       //april_ref_pose.pose.position.x = (camera_position_in_tag_frame.position.x + 399*april_ref_pose.pose.position.x)/400;
       //april_ref_pose.pose.position.y = (camera_position_in_tag_frame.position.y + 399*april_ref_pose.pose.position.y)/400;
       //april_ref_pose.pose.position.z = (camera_position_in_tag_frame.position.z + 399*april_ref_pose.pose.position.z)/400;
-     
 
       twist_pub = twist_zero;
-      twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
-      twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
-      twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
-
+      if(current_state.mode == "OFFBOARD"){
+	
+	if(time < 6){
+	  twist_pub = twist_zero;
+      	  twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
+      	  twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
+      	  twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
+	}
+	else if(time < 10){
+	  twist_pub = twist_zero;
+	  twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
+      	  twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
+	  twist_pub.twist.linear.z = -1;
+	}
+        else{
+	  twist_pub = twist_zero;
+        } 
+      }
       set_vel_pub.publish(twist_pub);
 	
 	publish_idx++;
