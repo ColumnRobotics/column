@@ -126,9 +126,13 @@ int main(int argc, char **argv)
 //    des_position.pose.position.x += 0.5;
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
-<<<<<<< HEAD
       float time = (ros::Time::now()-time_begin).toSec();
       
+	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
+	    camera_position_in_tag_frame.position.x,
+            camera_position_in_tag_frame.position.y,
+            camera_position_in_tag_frame.position.z);
+
       if(current_state.mode == "OFFBOARD"){
 	if(time < 0){
 	  twist_pub = twist_zero;
@@ -152,20 +156,6 @@ int main(int argc, char **argv)
       ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
       ros::spinOnce();
       rate.sleep();
-=======
-
-	if(current_state.mode == "OFFBOARD"){
-        	//set_vel_pub.publish(command_twist);
-	}
-	// Print the camera position in the tag frame: X, Y, Z
-	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
-	    camera_position_in_tag_frame.position.x,
-            camera_position_in_tag_frame.position.y,
-            camera_position_in_tag_frame.position.z);
-
-        ros::spinOnce();
-        rate.sleep();
->>>>>>> 485988641d3b03e9ed88718760bb7944f8f51063
     }
 
     return 0;
