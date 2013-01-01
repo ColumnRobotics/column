@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
   rectified_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("rectified_pose", 10); // Publisher of rectified pose
   
-  ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::Pose>("april_pose", 10, tag_cb);   //changed to april_pose_drop,updates every 1Hz
+  ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::PoseStamped>("april_pose", 10, tag_cb);   //changed to april_pose_drop,updates every 1Hz
   
   while (ros::ok()){
     ros::spinOnce();
