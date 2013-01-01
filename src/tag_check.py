@@ -50,10 +50,10 @@ def pose_cb(msg):
 def tag_detect_cb(msg):
     rospy.loginfo("Tag Detected")
     #rospy.set_param('/pose_last_tagupdate_time', msg.header.stamp.secs)
-    #rospy.set_param('/pose_last_tagupdate_x', -current_pose.pose.position.x)
-    #rospy.set_param('/pose_last_tagupdate_y', -current_pose.pose.position.y)
-    #rospy.set_param('/pose_last_tagupdate_z', current_pose.pose.position.z)
-    #rospy.set_param('/pose_last_tagupdate_yaw', get_yaw(current_pose.pose))
+    rospy.set_param('/pose_at_tagupdate_x', -current_pose.pose.position.x)
+    rospy.set_param('/pose_at_tagupdate_y', -current_pose.pose.position.y)
+    #rospy.set_param('/pose_at_tagupdate_z', current_pose.pose.position.z)
+    rospy.set_param('/pose_at_tagupdate_yaw', get_yaw(current_pose.pose))
     rospy.set_param('/tag_detect', 1) # Ensure that you write all the other params before setting tag_detect
  
 def listener():

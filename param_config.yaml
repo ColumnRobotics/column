@@ -25,9 +25,9 @@ ransac_inlier_threshold: 0.1
 pose_filter_min_points: 10 # Originally 10
 pose_filter_covariance_threshold: 0.4  # Orig. 0.3: Must be less than or equal
 # Get the pose update from the last tag
-#pose_last_tagupdate_x: -1000.0   # Default Value. Don't ever go to these
-#pose_last_tagupdate_y: -1000.0
-#pose_last_tagupdate_z: -1000.0
-#pose_last_tagupdate_yaw: -1000.0
-pose_last_tagupdate_time: -1000.0
+pose_at_tagupdate_x: 0.0   # Default Value. Don't ever go to these
+pose_at_tagupdate_y: 0.0
+pose_at_tagupdate_z: 0.0
+pose_at_tagupdate_yaw: 0.0
+#pose_last_tagupdate_time: -1000.0
 
