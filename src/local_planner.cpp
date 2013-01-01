@@ -155,7 +155,7 @@ int main(int argc, char **argv)
         ros::param::getCached("/control_gains/d_yaw", kd_yaw);
 
         float max_xy_vel;
-        ros::param::getCached("/max_xy_vel", max_xy_vel)
+        ros::param::getCached("/max_xy_vel", max_xy_vel);
 
 	    float x_rel_setpoint, y_rel_setpoint, z_rel_setpoint, yaw_rel_setpoint;
 	    ros::param::getCached("/x_rel_setpoint",      x_rel_setpoint);
@@ -204,8 +204,8 @@ int main(int argc, char **argv)
               //twist_pub.twist.linear.x = 0.0;
               //twist_pub.twist.linear.y = 0.0;
               float land_z_vel;
-              ros::param::getCached('/land_z_vel', land_z_vel);
-              twist_pub.twist.linear.z = -land_z_vel
+              ros::param::getCached("/land_z_vel", land_z_vel);
+              twist_pub.twist.linear.z = -land_z_vel;
 	      }	
 	      if(zero_vel > 0){twist_pub = twist_zero;}
 
