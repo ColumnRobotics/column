@@ -71,10 +71,14 @@ int main(int argc, char **argv)
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
-    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::Pose>
-            ("april_pose", 10, tag_cb);
+    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::Pose>("april_pose", 10, tag_cb);   //changed to april_pose_drop,updates every 1Hz
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
+
+    ros::Publisher rectified_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
+            ("rectified_pose", 10);
+    ros::Publisher des_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
+            ("des_pose", 10);
 
     ros::Publisher set_vel_pub = nh.advertise<geometry_msgs::TwistStamped>
             ("mavros/setpoint_velocity/cmd_vel", 10);
@@ -97,7 +101,8 @@ int main(int argc, char **argv)
 
     // wait for FCU connection
     while(ros::ok() && current_state.connected){
-        
+        rectified_pose_pub.publish(camera_position_in_tag_frame);
+	//des_pose_pub.publish(des_position);
         ros::spinOnce();
         rate.sleep();
     }
@@ -121,7 +126,7 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    float kp = 4.0;
+    float kp = 3.0;
     float kd = 1.0;
     float last_error_x = 0.0;
     float last_error_y = 0.0;
@@ -133,14 +138,29 @@ int main(int argc, char **argv)
 
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
+    geometry_msgs::PoseStamped new_des_position = current_position;
     geometry_msgs::PoseStamped initial_position = current_position;
-    ROS_INFO("Offboard mode enabled! ");
+    des_position.pose.position.x = current_position_at_last_tag_frame_x - camera_position_in_tag_frame.position.x;
+    des_position.pose.position.y = current_position_at_last_tag_frame_y + camera_position_in_tag_frame.position.y;
+    //des_position.pose.position.x = new_des_position
 
+    //rectified_pose_pub.publish(camera_position_in_tag_frame);
+    //des_pose_pub.publish(des_position);
+    ROS_INFO("Time (s): %f", des_position.pose.position.x);
+      
+
+
+
+    ROS_INFO("Offboard mode enabled! ");
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
       float t_start = 4.0;
       float t_land = t_start + 24.0;
+      new_des_position.pose.position.x = current_position_at_last_tag_frame_x - camera_position_in_tag_frame.position.x;
+      new_des_position.pose.position.y = current_position_at_last_tag_frame_y + camera_position_in_tag_frame.position.y;
+      des_position.pose.position.x = new_des_position.pose.position.x;
+      des_position.pose.position.y = new_des_position.pose.position.y;
      //Set desired position sequence 
       /*if(time > t_start){ //No changes for first 2 seconds
 	if(time < t_start+4){
@@ -180,6 +200,9 @@ int main(int argc, char **argv)
       if(time > t_land    ){twist_pub.twist.linear.z = -1;}	
 
       set_vel_pub.publish(twist_pub);
+      rectified_pose_pub.publish(camera_position_in_tag_frame);
+      //des_pose_pub.publish(des_position);
+      
 
 	//Print info at 2 hz	
 	publish_idx++;
@@ -187,7 +210,9 @@ int main(int argc, char **argv)
         ROS_INFO("Time (s): %f", time);
         ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
         ROS_INFO("Current Pos:  x:%f  y:%f  z:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z);
-        ROS_INFO("Desired Pos:  x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
+        ROS_INFO("Tag Pos:  x:%f  y:%f  z:%f", camera_position_in_tag_frame.position.x, camera_position_in_tag_frame.position.y, camera_position_in_tag_frame.position.z);
+	ROS_INFO("des_Pos: x:%f y:%f", des_position.pose.position.x, des_position.pose.position.y);
+	ROS_INFO("New des_Pos: x:%f y:%f", new_des_position.pose.position.x, new_des_position.pose.position.y);
 	}
 	
         ros::spinOnce();
