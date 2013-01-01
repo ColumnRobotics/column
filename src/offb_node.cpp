@@ -96,7 +96,8 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    
+
+
     geometry_msgs::TwistStamped twist_zero;
     twist_zero.header.stamp = ros::Time::now();
     twist_zero.header.frame_id = "fcu";
@@ -122,27 +123,41 @@ int main(int argc, char **argv)
         rate.sleep();
     }
     float kp = 1.0;
+
+// Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
+    geometry_msgs::PoseStamped april_ref_pose = current_position;
+
+//Set reference pose using april tag once
+      des_position.pose.position.x = current_position.pose.position.x + camera_position_in_tag_frame.position.x;
+      des_position.pose.position.y = current_position.pose.position.y + camera_position_in_tag_frame.position.y;
+      des_position.pose.position.z = current_position.pose.position.z + camera_position_in_tag_frame.position.z;
 //    des_position.pose.position.x += 0.5;
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
       
 
-      if(current_state.mode == "OFFBOARD"){
+    /*  if(current_state.mode == "OFFBOARD"){
 	if(time < 0){
-	  twist_pub = twist_zero;
+	 // twist_pub = twist_zero;
         }
 	else if(time < 1){
-	  twist_pub = twist_x; //was x
+	  //twist_pub = twist_x; //was x
 	}
 	//else if(time < 2){
 	//  twist_pub = twist_zero;
 	//}
 	else if(time < 3){
-	  twist_pub = twist_x;
+	  //twist_pub = twist_x;b
 	}
-      }
+      }*/
+      
+      //april_ref_pose.pose.position.x = (camera_position_in_tag_frame.position.x + 399*april_ref_pose.pose.position.x)/400;
+      //april_ref_pose.pose.position.y = (camera_position_in_tag_frame.position.y + 399*april_ref_pose.pose.position.y)/400;
+      //april_ref_pose.pose.position.z = (camera_position_in_tag_frame.position.z + 399*april_ref_pose.pose.position.z)/400;
+     
+
       twist_pub = twist_zero;
       twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
       twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
