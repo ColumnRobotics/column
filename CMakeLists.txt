@@ -133,11 +133,13 @@ include_directories(
 # add_executable(column_node src/column_node.cpp)
 add_executable(offb_node src/offb_node.cpp)
 add_executable(local_planner src/local_planner.cpp)
+add_executable(rectified_april_tag src/rectified_april_tag.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(column_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(offb_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(rectified_april_tag ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(column_node
@@ -148,6 +150,10 @@ target_link_libraries(offb_node
 	${catkin_LIBRARIES}
 )
 target_link_libraries(local_planner
+	${catkin_LIBRARIES}
+)
+
+target_link_libraries(rectified_april_tag
 	${catkin_LIBRARIES}
 )
 #############
