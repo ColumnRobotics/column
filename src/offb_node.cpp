@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
@@ -39,6 +40,10 @@ int main(int argc, char **argv)
             ("april_pose", 10, tag_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
+
+    ros::Publisher set_vel_pub = nh.advertise<geometry_msgs::TwistStamped>
+            ("mavros/setpoint_velocity/cmd_vel", 10);
+
     ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
             ("mavros/cmd/arming");
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
@@ -59,86 +64,36 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-
-    geometry_msgs::PoseStamped zero_pose;
-    zero_pose.pose.position.x = current_position.pose.position.x;
-    zero_pose.pose.position.y = current_position.pose.position.y;
-    zero_pose.pose.position.z = current_position.pose.position.z;
-
-    geometry_msgs::PoseStamped ref_pose;
-    ROS_INFO("X:%f, Y:%f, Z:%f", current_position.pose.position.x,
-    	current_position.pose.position.y,
-	current_position.pose.position.z);
-    ref_pose.pose.position.x = current_position.pose.position.x + tag_position.position.x/100; //CHECK UNITs
-    ref_pose.pose.position.y = current_position.pose.position.y + tag_position.position.y/100;
-    ref_pose.pose.position.z = current_position.pose.position.z + tag_position.position.z/100;
+    
+    
+    geometry_msgs::TwistStamped command_twist;
+    ros::Time::now();
+   
+    command_twist.header.stamp = ros::Time::now();
+    command_twist.header.frame_id = "fcu";
+    command_twist.twist.linear.x = 0.0;
+    command_twist.twist.linear.y = 0.0;
+    command_twist.twist.linear.z = -0.5;
+    command_twist.twist.angular.x = 0.0;
+    command_twist.twist.angular.y = 0.0;
+    command_twist.twist.angular.z = 0.0;
+	
 
     //send a few setpoints before starting
     for(int i = 100; ros::ok() && i > 0; --i){
-        local_pos_pub.publish(ref_pose);
+        set_vel_pub.publish(command_twist);
         ros::spinOnce();
         rate.sleep();
     }
 
-    mavros_msgs::SetMode offb_set_mode;
-    offb_set_mode.request.custom_mode = "OFFBOARD";
 
-    mavros_msgs::CommandBool arm_cmd;
-    arm_cmd.request.value = true;
-
-    ros::Time last_request = ros::Time::now();
 
     while(ros::ok()){
-/*
-        if( current_state.mode != "OFFBOARD" &&
-            (ros::Time::now() - last_request > ros::Duration(5.0))){
-            if( set_mode_client.call(offb_set_mode) &&
-                offb_set_mode.response.success){
-                ROS_INFO("Offboard enabled");
-		//ref_pose.pose.position.x = current_position.pose.position.x;
-        	//ref_pose.pose.position.y = current_position.pose.position.y;
-        	//ref_pose.pose.position.z = current_position.pose.position.z;
-            }
-            last_request = ros::Time::now();
-        } else {
-            if( !current_state.armed &&
-                (ros::Time::now() - last_request > ros::Duration(5.0))){
-                if( arming_client.call(arm_cmd) &&
-                    arm_cmd.response.success){
-                    ROS_INFO("Vehicle armed");
-                }
-                last_request = ros::Time::now();
-            }
-        }
-	if(!flag){
-		ref_pose.pose.position.x = - 100;
-    		ref_pose.pose.position.y = current_position.pose.position.y;
-    		ref_pose.pose.position.z = current_position.pose.position.z;
-		flag = true;
-	}
-*/
-	 //zero_pose.pose.position.x = current_position.pose.position.x;
-         //zero_pose.pose.position.y = current_position.pose.position.y;
-         //zero_pose.pose.position.z = current_position.pose.position.z;
-	
-	avg_april_pose_x = (publish_skip * avg_april_pose_x + tag_position.position.x) / (publish_skip + 1);
-	avg_april_pose_y = (publish_skip * avg_april_pose_y + tag_position.position.y) / (publish_skip + 1);
 
-	publish_idx++;
-        if((publish_idx % publish_skip) == 0){
-        ref_pose.pose.position.x = current_position.pose.position.x - avg_april_pose_x*2.54/100; //CHECK UNITs
-        ref_pose.pose.position.y = current_position.pose.position.y + avg_april_pose_y*2.54/100;
-        ref_pose.pose.position.z = current_position.pose.position.z; //+ tag_position.position.z/100;
-/*	ROS_INFO("Ref-X:%f Ref-Y:%f Ref-Z:%f", ref_pose.pose.position.x, 
-           ref_pose.pose.position.y, 
-           ref_pose.pose.position.z);*/
-	
-	   ROS_INFO("avg Tag-X:%f avg Tag-Y:%f Tag-Z:%f", avg_april_pose_x,
-	   avg_april_pose_y,
-	   tag_position.position.z);
+	if(current_state.mode == "OFFBOARD"){
+        set_vel_pub.publish(command_twist);
 	}
 
-        local_pos_pub.publish(ref_pose);
 
         ros::spinOnce();
         rate.sleep();
