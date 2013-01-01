@@ -103,7 +103,7 @@ def lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0):
         last_setpoint = setpoint
         time.sleep(waypoint_delay_s)
 
-def center_on_dock():
+def center_on_dock(interpolate=False):
     #update_time = rospy.get_param('/pose_last_tagupdate_time')
     if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
         rospy.loginfo("Homing in on April Tag!!")
@@ -120,10 +120,15 @@ def center_on_dock():
                                     - rospy.get_param('yaw_init'))
 
         # Actually command the path, without aborting on tag sightings
-        current_setpoint = (rospy.get_param('/x_rel_setpoint'), 
-                            rospy.get_param('/y_rel_setpoint'))
-        command_path(current_setpoint, (new_rel_setpoint_x, new_rel_setpoint_y),
-                     speed_mps=0.2, tag_seen=True)
+        if interpolate:
+            current_setpoint = (rospy.get_param('/x_rel_setpoint'), 
+                                rospy.get_param('/y_rel_setpoint'))
+            command_path(current_setpoint, (new_rel_setpoint_x, new_rel_setpoint_y),
+                         speed_mps=0.2, tag_seen=True)
+        else:
+            rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
+            rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
+            rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
 
 
 if __name__ == '__main__':
@@ -142,22 +147,29 @@ if __name__ == '__main__':
     rospy.set_param('/tag_detect', 0)
 
     rospy.loginfo("Begin Search")
-    lawnmower_search(dx=0.5, dy=0.6, speed_mps=0.1, waypoint_delay_s=1.0)
+    lawnmower_search(dx=0.7, dy=0.6, speed_mps=0.15, waypoint_delay_s=1.0)
     # Returns when april tag has been detected
-    time.sleep(2) # Pause
+    
+    time.sleep(2) # Pause 
     rospy.loginfo("Move to pre-dock")
-    center_on_dock() 
-    time.sleep(2)
-    center_on_dock() 
-    time.sleep(2)
+    center_on_dock(interpolate=True) 
+    time.sleep(2) # Pause 
+    # Hold position over april tag for 3 seconds
+    for _ in range(6):
+        center_on_dock() 
+        time.sleep(0.5)
+
     rospy.loginfo("Land")
     rospy.set_param('/land_now', 1)
+    hover_z = 0.0
     while not rospy.is_shutdown():
         # Hover once below 1m above dock
+        rospy.loginfo("filtered_tag_z = {}".format(hover_z))
         if rospy.get_param('/filtered_tag_z') < 1.0:
             # Z in these frames is 0 at initial height - will be negative here
-            rospy.loginfo("Hovering!")
-            rospy.set_param('/z_rel_setpoint', rospy.get_param('/pose_last_tagupdate_z'))
+            if hover_z != 0.0: hover_z =  rospy.get_param('/pose_last_tagupdate_z')
+            rospy.loginfo("Hovering at Z = {}".format(hover_z))
+            rospy.set_param('/z_rel_setpoint', hover_z)
             rospy.set_param('/land_now', 0)
         time.sleep(0.3)
         center_on_dock() # move to predock
