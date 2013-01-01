@@ -16,4 +16,9 @@ filtered_tag_y: 0.0
 # Values that force negative Z or zero velocity
 land_now: 0
 zero_vel: 0
+# April-tag Filtering related
+ransac_inlier_threshold: 0.1
+pose_filter_min_points: 7 # Originally 10
+pose_filter_covariance_threshold: 0.4  # Orig. 0.3: Must be less than or equal
+
 

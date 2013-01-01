@@ -7,7 +7,8 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_line(const std::
     srand(time(NULL)); // Seed the random number generator
     int num_runs = 20; // How many times to try ransac
     int vec_size = reading_vec.size(); // Number of readings
-    double th = 0.1; // Threshold for an inlier
+    double th;//= 0.1; // Threshold for an inlier
+    ros::param::get("/ransac_inlier_threshold", th);
 
     int best_inliers = 0; // Max inliers
     double best_avg[3] = {0, 0, 0}; // Average values
@@ -109,7 +110,8 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
     // Parameters
     int vec_size = reading_vec.size(); // Number of readings
     int num_runs = vec_size; // How many times to try ransac
-    double th = 0.1; // Threshold for an inlier
+    double th;//= 0.1; // Threshold for an inlier
+    ros::param::get("/ransac_inlier_threshold", th);
 
     int best_inliers = 0; // Max inliers
     double best_avg[3] = {0, 0, 0}; // Average values

@@ -24,9 +24,12 @@ geometry_msgs::PoseStamped camera_position_in_tag_frame_stamped;
 geometry_msgs::PoseWithCovarianceStamped filtered_pose_with_cov;
 geometry_msgs::PoseStamped filtered_pose;
 
-int num_filtered = 10;
-double th = 0.3;
+
 void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
+    int num_filtered;// = 10;
+    ros::param::get("/pose_filter_min_points", num_filtered);
+    double th;// = 0.3;
+    ros::param::get("/pose_filter_covariance_threshold", th);
     // Get the pose from the rectified_pose topic
     camera_position_in_tag_frame_stamped = *pose;
     reading_vec.push_back(camera_position_in_tag_frame_stamped);

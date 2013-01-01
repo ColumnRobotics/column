@@ -34,12 +34,12 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         if rospy.get_param('/tag_detect') == 1:
             rospy.loginfo("Found April Tag!!")
             
-            rospy.set_param('/x_rel_setpoint', rospy.get_param('filtered_tag_x'))
-            rospy.set_param('/y_rel_setpoint', rospy.get_param('filtered_tag_y'))
+            rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
+            rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
             # Give 2 seconds to stabilize, then re-set once more for good measure
             time.sleep(2)
-            rospy.set_param('/x_rel_setpoint', rospy.get_param('filtered_tag_x'))
-            rospy.set_param('/y_rel_setpoint', rospy.get_param('filtered_tag_y'))
+            rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
+            rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
             time.sleep(1) 
 
             land_now()
@@ -72,18 +72,20 @@ def cone_search():
     # Forward expanding cone search path (forward 2.4m, out +/- 0.9m)
     # NOTE that obnoxiously, +x is to the drone's LEFT, +y is to the drone's REAR
     xy_setpoints = [( 0.0,  0.0),
-                    ( 0.3, -0.8),
-                    (-0.3, -0.8),
-                    (-0.6, -1.6),
-                    ( 0.6, -1.6),
-                    ( 0.9, -2.4),
-                    ( -0.9, -2.4)]
+                    ( 0.3, -0.5),
+                    (-0.3, -0.5),
+                    (-0.6, -1.0),
+                    ( 0.6, -1.0),
+                    ( 0.9, -1.5),
+                    ( -0.9,-1.5),
+                    ( -0.9,-2.0),
+                    ( 0.9, -2.0)]
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):
         rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
                                                       xy_setpoints[i+1][1]) 
-        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.2)
+        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.1)
         time.sleep(2)
     land_now()    
 
