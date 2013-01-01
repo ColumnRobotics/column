@@ -116,6 +116,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -123,6 +124,11 @@ include_directories(
 # add_library(column
 #   src/${PROJECT_NAME}/column.cpp
 # )
+
+add_library(column
+  include/column/BodyPoseFilter.h
+  src/BodyPoseFilter.cpp
+  src/world_modeling.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -132,10 +138,15 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(column_node src/column_node.cpp)
 add_executable(local_planner src/local_planner.cpp)
+add_executable(rectified_april_tag src/rectified_april_tag.cpp)
+add_executable(world_modeling src/world_modeling.cpp)
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(column_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(rectified_april_tag ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(world_modeling column ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(column_node
@@ -145,6 +156,16 @@ add_dependencies(local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 target_link_libraries(local_planner
 	${catkin_LIBRARIES}
 )
+
+target_link_libraries(rectified_april_tag
+	${catkin_LIBRARIES}
+)
+
+target_link_libraries(world_modeling
+	${catkin_LIBRARIES}
+	column
+)
+
 #############
 ## Install ##
 #############

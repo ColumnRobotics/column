@@ -25,41 +25,13 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     current_position = *pose;
 }
 
-geometry_msgs::Pose tag_position_in_camera_frame;
 geometry_msgs::Pose camera_position_in_tag_frame;
 double current_position_at_last_tag_frame_x;
 double current_position_at_last_tag_frame_y;
-void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
-    double roll, pitch, yaw;
+void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     // Get the tag position in the camera frame
-    tag_position_in_camera_frame = *pose;
-    // Get the camera position in the camera frame
-    //tf::Quaternion Q = tf::Quaternion(tag_position_in_camera_frame.orientation.x,
-    //	tag_position_in_camera_frame.orientation.y, tag_position_in_camera_frame.orientation.z,
-    //	tag_position_in_camera_frame.orientation.w);
-    tf::Matrix3x3 R = tf::Matrix3x3(); // Get the rotation matrix
-    yaw = tag_position_in_camera_frame.orientation.x;
-    pitch = tag_position_in_camera_frame.orientation.y;
-    roll = tag_position_in_camera_frame.orientation.z;
-    //R.getRPY(roll,pitch,yaw);
-    R.setEulerYPR(yaw, pitch, roll);
-    R = R.inverse();
-    //R.getRPY(roll,pitch,yaw);
-    //ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f",
-    //	roll*180/3.1415926, pitch*180/3.1415926, yaw*180/3.1415926);
-    camera_position_in_tag_frame.position.x = (R[0][0]*tag_position_in_camera_frame.position.x +
-        R[0][1]*tag_position_in_camera_frame.position.y +
-        R[0][2]*tag_position_in_camera_frame.position.z) * 0.0254;
-    camera_position_in_tag_frame.position.y = (R[1][0]*tag_position_in_camera_frame.position.x + 
-        R[1][1]*tag_position_in_camera_frame.position.y +
-        R[1][2]*tag_position_in_camera_frame.position.z) * 0.0254;
-    camera_position_in_tag_frame.position.z = (R[2][0]*tag_position_in_camera_frame.position.x +
-        R[2][1]*tag_position_in_camera_frame.position.y +
-        R[2][2]*tag_position_in_camera_frame.position.z) * 0.0254;
-    camera_position_in_tag_frame.orientation.x = 0;
-    camera_position_in_tag_frame.orientation.y = 0;
-    camera_position_in_tag_frame.orientation.z = 0;
-    camera_position_in_tag_frame.orientation.w = 0;
+    camera_position_in_tag_frame = *pose.pose;
+    // Get the current position each call back
     current_position_at_last_tag_frame_x = current_position.pose.position.x;
     current_position_at_last_tag_frame_y = current_position.pose.position.y;
 }
@@ -71,8 +43,8 @@ int main(int argc, char **argv)
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
-    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::Pose>
-            ("april_pose", 10, tag_cb);
+    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::PoseStamped>
+            ("filtered_pose", 10, tag_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
 
@@ -97,7 +69,6 @@ int main(int argc, char **argv)
 
     // wait for FCU connection
     while(ros::ok() && current_state.connected){
-        
         ros::spinOnce();
         rate.sleep();
     }
