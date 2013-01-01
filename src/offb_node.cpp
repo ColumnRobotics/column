@@ -172,8 +172,8 @@ int main(int argc, char **argv)
             camera_position_in_tag_frame.position.z);
 	}
 
-      ros::spinOnce();
-      rate.sleep();
+        ros::spinOnce();
+        rate.sleep();
     }
 
     return 0;
