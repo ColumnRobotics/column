@@ -11,6 +11,7 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
+#include <tf/transform_datatypes.h>
 
 bool flag = false;
 
@@ -24,9 +25,39 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     current_position = *pose;
 }
 
-geometry_msgs::Pose tag_position;
+geometry_msgs::Pose tag_position_in_camera_frame;
+geometry_msgs::Pose camera_position_in_tag_frame;
 void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
-    tag_position = *pose;
+    double roll, pitch, yaw;
+    // Get the tag position in the camera frame
+    tag_position_in_camera_frame = *pose;
+    // Get the camera position in the camera frame
+    //tf::Quaternion Q = tf::Quaternion(tag_position_in_camera_frame.orientation.x,
+    //	tag_position_in_camera_frame.orientation.y, tag_position_in_camera_frame.orientation.z,
+    //	tag_position_in_camera_frame.orientation.w);
+    tf::Matrix3x3 R = tf::Matrix3x3(); // Get the rotation matrix
+    yaw = tag_position_in_camera_frame.orientation.x;
+    pitch = tag_position_in_camera_frame.orientation.y;
+    roll = tag_position_in_camera_frame.orientation.z;
+    //R.getRPY(roll,pitch,yaw);
+    R.setEulerYPR(yaw, pitch, roll);
+    R = R.inverse();
+    //R.getRPY(roll,pitch,yaw);
+    //ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f",
+    //	roll*180/3.1415926, pitch*180/3.1415926, yaw*180/3.1415926);
+    camera_position_in_tag_frame.position.x = (R[0][0]*tag_position_in_camera_frame.position.x +
+        R[0][1]*tag_position_in_camera_frame.position.y +
+        R[0][2]*tag_position_in_camera_frame.position.z) * 0.0254;
+    camera_position_in_tag_frame.position.y = (R[1][0]*tag_position_in_camera_frame.position.x + 
+        R[1][1]*tag_position_in_camera_frame.position.y +
+        R[1][2]*tag_position_in_camera_frame.position.z) * 0.0254;
+    camera_position_in_tag_frame.position.z = (R[2][0]*tag_position_in_camera_frame.position.x +
+        R[2][1]*tag_position_in_camera_frame.position.y +
+        R[2][2]*tag_position_in_camera_frame.position.z) * 0.0254;
+    camera_position_in_tag_frame.orientation.x = 0;
+    camera_position_in_tag_frame.orientation.y = 0;
+    camera_position_in_tag_frame.orientation.z = 0;
+    camera_position_in_tag_frame.orientation.w = 0;
 }
 
 int main(int argc, char **argv)
@@ -95,6 +126,7 @@ int main(int argc, char **argv)
 //    des_position.pose.position.x += 0.5;
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
+<<<<<<< HEAD
       float time = (ros::Time::now()-time_begin).toSec();
       
       if(current_state.mode == "OFFBOARD"){
@@ -120,6 +152,20 @@ int main(int argc, char **argv)
       ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
       ros::spinOnce();
       rate.sleep();
+=======
+
+	if(current_state.mode == "OFFBOARD"){
+        	//set_vel_pub.publish(command_twist);
+	}
+	// Print the camera position in the tag frame: X, Y, Z
+	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
+	    camera_position_in_tag_frame.position.x,
+            camera_position_in_tag_frame.position.y,
+            camera_position_in_tag_frame.position.z);
+
+        ros::spinOnce();
+        rate.sleep();
+>>>>>>> 485988641d3b03e9ed88718760bb7944f8f51063
     }
 
     return 0;
