@@ -4,6 +4,7 @@
 Example Python node to listen on a specific topic.
 """
 
+from __future__ import division
 # Import required Python code.
 import rospy
 import time
@@ -13,13 +14,14 @@ from geometry_msgs.msg import Pose
 import mavros 
 import subprocess
 
+
 def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
     """
     Setpoints as (x, y) tuples to be sent to /?_rel_setpoint parameter
     """
     path_length = np.sqrt((start_setpoint[0] - end_setpoint[0])**2 +
                           (start_setpoint[1] - end_setpoint[1])**2)
-    duration_s = path_length * speed_mps
+    duration_s = path_length / speed_mps
 
     # Create interpolated position arrays with 10 * duration(seconds) points
     x_array = np.linspace(start_setpoint[0], end_setpoint[0], duration_s*10.0);
@@ -45,17 +47,17 @@ def cone_search():
 
     # Square-shaped cone search path
     xy_setpoints = [( 0.0,  0.0),
-                    (-0.3,  0.0),
-                    (-0.3, -0.3),
-                    ( 0.3, -0.3),
-                    ( 0.3, -0.6),
-                    ( 0.0, -0.6)]
+                    (-0.6,  0.0),
+                    (-0.6, -0.6),
+                    ( 0.6, -0.6),
+                    ( 0.6, -1.2),
+                    ( 0.0, -1.2)]
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):
         rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
                                                       xy_setpoints[i+1][1]) 
-        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.2);
+        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.2)
         time.sleep(2)
 
     print "Landing Now"
