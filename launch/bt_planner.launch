@@ -1,0 +1,4 @@
+<launch>
+  <node name="local_planner" pkg="column" type="local_planner"  output="screen"/>
+  <rosparam command="load" file="$(find column)/param_config.yaml" />
+</launch>

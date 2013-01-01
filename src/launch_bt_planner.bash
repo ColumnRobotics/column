@@ -22,4 +22,4 @@ rosrun april_tag april_tag_node &
 
 sleep 1
 
-roslaunch column param_offb.launch
+roslaunch column bt_planner.launch

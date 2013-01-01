@@ -1,6 +1,15 @@
 control_gains: {p: 4.0, d: 1.0}
+# Controls for search pattern sequence
 land_time: 20.0
 start_time: 5.0
-inter_pose_time: 3.0
-x_rel_list: [0.3, 0.3, 0.0, 0.0]
-y_rel_list: [0.0, 0.3, 0.3, 0.0]
+inter_pose_delay: 3.0
+# Position setpoints relative to where offboard mode is enabled
+x_rel_setpoint: 0
+y_rel_setpoint: 0
+z_rel_setpoint: 0
+theta_rel_setpoint: 0 # NOT yet implemented
+# Boolean values that force negative Z or zero velocity
+land_now: 0
+zero_vel: 0
+# Manually set to 1 to reset script sequence
+reset_script: 0
