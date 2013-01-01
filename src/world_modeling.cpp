@@ -19,21 +19,19 @@ ros::Publisher pose_estimate_pub;
 std::deque<geometry_msgs::PoseStamped> reading_vec; 
 BodyPoseFilter bpf = BodyPoseFilter();
 
-geometry_msgs::Pose tag_position_in_camera_frame;
-geometry_msgs::Pose camera_position_in_tag_frame;
+geometry_msgs::PoseStamped tag_position_in_camera_frame;
 geometry_msgs::PoseStamped camera_position_in_tag_frame_stamped;
 geometry_msgs::PoseWithCovarianceStamped filtered_pose_with_cov;
 geometry_msgs::PoseStamped filtered_pose;
 
 int num_filtered = 10;
 double th = 0.3;
-void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
+void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     // Get the pose from the rectified_pose topic
-    camera_position_in_tag_frame = * pose;
-    camera_position_in_tag_frame_stamped.pose = camera_position_in_tag_frame;
+    camera_position_in_tag_frame_stamped = *pose;
     reading_vec.push_back(camera_position_in_tag_frame_stamped);
     // Get the pose estimate from the Body Pose Filter
-    if(reading_vec.size() == num_filtered){
+    if(reading_vec.size() == num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
         filtered_pose_with_cov = bpf.ransac_point(reading_vec);
         if(filtered_pose_with_cov.pose.covariance[0] <= th){
             //filtered_pose.pose = filtered_pose_with_cov.pose.pose;
@@ -41,7 +39,7 @@ void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
                 pose_estimate_pub.publish(filtered_pose_with_cov);
         }
     }
-    else if(reading_vec.size() > num_filtered){
+    else if(reading_vec.size() > num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
         reading_vec.pop_front();
         filtered_pose_with_cov = bpf.ransac_point(reading_vec);
         if(filtered_pose_with_cov.pose.covariance[0] <= th){
@@ -59,7 +57,7 @@ int main(int argc, char **argv)
 
   ros::Rate loop_rate(10);
 
-  rectified_pose_sub = nh.subscribe<geometry_msgs::Pose>("rectified_pose", 10, tag_cb); // Publisher of rectified pose
+  rectified_pose_sub = nh.subscribe<geometry_msgs::PoseStamped>("rectified_pose", 10, tag_cb); // Publisher of rectified pose
 
   pose_estimate_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("filtered_pose", 10); // Publisher of rectified pose
   
