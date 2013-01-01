@@ -12,6 +12,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <tf/transform_datatypes.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 bool flag = false;
 
@@ -43,7 +44,7 @@ int main(int argc, char **argv)
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
-    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::PoseStamped>
+    ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>
             ("filtered_pose", 10, tag_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);

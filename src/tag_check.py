@@ -13,12 +13,14 @@ from mavros_msgs.msg import State
 from geometry_msgs.msg import Pose
 
 def april_cb(msg):
-    print "Tag Detected"
+    rospy.loginfo("Tag Detected")
     rospy.set_param('/tag_detect', 1)
+    rospy.set_param('/filtered_tag_x', msg.pose.pose.position.x)
+    rospy.set_param('/filtered_tag_y', msg.pose.pose.position.y)
 
 def listener():
-    rospy.init_node('listener', anonymous=True)
-    rospy.Subscriber("april_pose", Pose, april_cb)
+    rospy.init_node('tag_listener', anonymous=True)
+    rospy.Subscriber("filtered_pose", Pose, april_cb)
     rospy.spin()
 
 if __name__ == '__main__':

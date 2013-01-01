@@ -1,0 +1,17 @@
+<launch>
+
+  <rosparam command="load" file="$(find column)/param_config.yaml" />
+
+  <node name="cole_node" pkg="april_tag" type="cole_node"  output="screen"/>
+
+  <node name="rectified_april_tag" pkg="column" type="rectified_april_tag"  output="screen"/>
+
+  <node name="world_modeling" pkg="column" type="world_modeling"  output="screen"/>
+
+  <node name="local_planner" pkg="column" type="local_planner"  output="screen"/>
+
+  <node name="tag_listener" pkg="column" type="tag_listener"  output="screen"/>
+
+  <node name="search_hover_land" pkg="column" type="search_hover_land"  output="screen"/>
+
+</launch>
