@@ -32,5 +32,5 @@ zero_vel: 0
 land_z_vel: 0.2  # Always positive
 # April-tag Filtering related
 ransac_inlier_threshold: 0.15 #Originally 0.1
-pose_filter_min_points: 10 # Originally 10, then (5)
+pose_filter_min_points: 5 # Originally 10, then (5)
 pose_filter_covariance_threshold: 0.3   # Orig. 0.3, Must be less than or equal
