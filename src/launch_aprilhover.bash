@@ -14,12 +14,12 @@ sleep 1
 
 roslaunch mavros px4.launch &
 sleep 1
-
-cd ~/catkin_ws/src/april_tag
+#cd ~/catkin_ws/src/april_tag
+cd ~/catkin_ws/
 source ./devel/setup.sh
 
-rosrun april_tag april_tag_node &
-
+#rosrun april_tag april_tag_node &
+rosrun april_tag cole_node &
 sleep 1
 
 rosrun column offb_node
