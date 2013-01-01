@@ -199,7 +199,7 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
             filtered_estimate.pose.covariance[i] = 0;
         }
     }
-    ROS_INFO("best_iniliers: %d variance: %f covariance[0]: %f \n", best_inliers, variance, filtered_estimate.pose.covariance[0]);
+    ROS_INFO("best_iniliers: %d variance: %f covariance[0]: %f", best_inliers, variance, filtered_estimate.pose.covariance[0]);
     return filtered_estimate;
 }
 

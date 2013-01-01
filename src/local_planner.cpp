@@ -158,9 +158,9 @@ int main(int argc, char **argv)
         ros::param::getCached("/max_xy_vel", max_xy_vel);
 
 	    float x_rel_setpoint, y_rel_setpoint, z_rel_setpoint, yaw_rel_setpoint;
-	    ros::param::getCached("/x_rel_setpoint",      x_rel_setpoint);
-	    ros::param::getCached("/y_rel_setpoint",      y_rel_setpoint);
-	    ros::param::getCached("/z_rel_setpoint",      z_rel_setpoint);
+	    ros::param::get("/x_rel_setpoint",      x_rel_setpoint);
+	    ros::param::get("/y_rel_setpoint",      y_rel_setpoint);
+	    ros::param::get("/z_rel_setpoint",      z_rel_setpoint);
 	    ros::param::getCached("/yaw_rel_setpoint",  yaw_rel_setpoint);
 	    //Convert from X=Right, Y=Forwards to X=Left, Y=Backwards (quad ros frame)
         x_rel_setpoint = -x_rel_setpoint;

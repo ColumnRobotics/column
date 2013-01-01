@@ -29,8 +29,8 @@ pose_last_tagupdate_time: 0.0
 # Values that force negative Z or zero velocity
 land_now: 0
 zero_vel: 0
-land_z_vel: 0.2
+land_z_vel: 0.2  # Always positive
 # April-tag Filtering related
 ransac_inlier_threshold: 0.1
-pose_filter_min_points: 5 # Originally 10
+pose_filter_min_points: 6 # Originally 10
 pose_filter_covariance_threshold: 0.3   # Orig. 0.3, Must be less than or equal

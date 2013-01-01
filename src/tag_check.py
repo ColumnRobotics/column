@@ -30,6 +30,9 @@ def april_cb(msg):
     #rospy.loginfo("Got reading")
     rospy.set_param('/filtered_detect', 1)
     # Saving all values in X right, Y forwards frame
+    rospy.loginfo("New filtered tag location xyz: {} {} {}".format(msg.pose.pose.position.x,
+                                                                   msg.pose.pose.position.y,
+                                                                   msg.pose.pose.position.z)) 
     rospy.set_param('/filtered_tag_x', msg.pose.pose.position.x)
     rospy.set_param('/filtered_tag_y', msg.pose.pose.position.y)
     rospy.set_param('/filtered_tag_z', msg.pose.pose.position.z)
