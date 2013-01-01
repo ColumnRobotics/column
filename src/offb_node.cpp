@@ -27,6 +27,8 @@ void position_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
 
 geometry_msgs::Pose tag_position_in_camera_frame;
 geometry_msgs::Pose camera_position_in_tag_frame;
+double current_position_at_last_tag_frame_x;
+double current_position_at_last_tag_frame_y;
 void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
     double roll, pitch, yaw;
     // Get the tag position in the camera frame
@@ -58,6 +60,8 @@ void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
     camera_position_in_tag_frame.orientation.y = 0;
     camera_position_in_tag_frame.orientation.z = 0;
     camera_position_in_tag_frame.orientation.w = 0;
+    current_position_at_last_tag_frame_x = current_position.pose.position.x;
+    current_position_at_last_tag_frame_y = current_position.pose.position.y;
 }
 
 int main(int argc, char **argv)
@@ -84,7 +88,7 @@ int main(int argc, char **argv)
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(100.0);
-    int publish_skip = 2*100; //Publish only every 2 seconds
+    int publish_skip = 1*100; //Publish only every 2 seconds
     int publish_idx = 0;
     
     float avg_april_pose_x = 0.0; 
@@ -129,9 +133,16 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped current_position_start = current_position;
 
 //Set reference pose using april tag once
-      des_position.pose.position.x = current_position.pose.position.x - camera_position_in_tag_frame.position.x;
-      des_position.pose.position.y = current_position.pose.position.y - camera_position_in_tag_frame.position.y;
     
+      des_position.pose.position.x = current_position_at_last_tag_frame_x - camera_position_in_tag_frame.position.x;
+      des_position.pose.position.y = current_position_at_last_tag_frame_y - camera_position_in_tag_frame.position.y;
+      des_position.pose.position.z = current_position.pose.position.z;
+	ROS_INFO("Offboard mode enabled! New camera position:");
+	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
+	    camera_position_in_tag_frame.position.x,
+            camera_position_in_tag_frame.position.y,
+            camera_position_in_tag_frame.position.z);
+//    des_position.pose.position.x += 0.5;
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
@@ -140,10 +151,22 @@ int main(int argc, char **argv)
       //april_ref_pose.pse.position.x = (camera_position_in_tag_frame.position.x + 399*april_ref_pose.pose.position.x)/400;
       //april_ref_pose.pose.position.y = (camera_position_in_tag_frame.position.y + 399*april_ref_pose.pose.position.y)/400;
 
+	publish_idx++;
+	if(publish_idx % publish_skip == 0){ 
+      des_position.pose.position.x = current_position_at_last_tag_frame_x - camera_position_in_tag_frame.position.x;
+      des_position.pose.position.y = current_position_at_last_tag_frame_y - camera_position_in_tag_frame.position.y;
+        ROS_INFO("NEW Tag Location Updates");
+	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
+	    camera_position_in_tag_frame.position.x,
+            camera_position_in_tag_frame.position.y,
+            camera_position_in_tag_frame.position.z);
+	}
+
       twist_pub = twist_zero;
       if(current_state.mode == "OFFBOARD"){
 	
-	if(time < 3){
+		
+	if(time < 6){
 	  twist_pub = twist_zero;
       	  twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
       	  twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
@@ -178,22 +201,21 @@ int main(int argc, char **argv)
 	}
         else{
 	  twist_pub = twist_zero;
-        } 
+	  } 
+	//twist_pub = twist_zero;
+	//twist_pub.twist.linear.y = -20;
       }
       set_vel_pub.publish(twist_pub);
 	
-	publish_idx++;
-	if(publish_idx % publish_skip == 0){ 
-        ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
-	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
-	    camera_position_in_tag_frame.position.x,
-            camera_position_in_tag_frame.position.y,
-            camera_position_in_tag_frame.position.z);
+	if(publish_idx % (publish_skip/2) == 0){ 
+        ROS_INFO("Velocities: secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
 	}
-
+	
         ros::spinOnce();
         rate.sleep();
     }
 
     return 0;
 }
+
+
