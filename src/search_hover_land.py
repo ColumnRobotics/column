@@ -32,15 +32,14 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         
         # Home in on tag then land instead, if tag detected
         if rospy.get_param('/tag_detect') == 1:
-            rospy.loginfo("Found April Tag!!")
+            rospy.loginfo("Homing in on April Tag!!")
             
             rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
             rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
-            # Give 2 seconds to stabilize, then re-set once more for good measure
-            time.sleep(2)
-            rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
-            rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
-            time.sleep(1) 
+            # Give 2 seconds to stabilize
+           # rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
+           # rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
+           time.sleep(2) 
 
             land_now()
         else:
@@ -55,6 +54,7 @@ def land_now():
     time.sleep(2.5)
     rospy.loginfo("Setting zero velocity target")
     rospy.set_param('/zero_vel', 1)
+    rospy.spin() # Do nothing until node closes
 
 
 def cone_search():

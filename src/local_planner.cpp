@@ -151,8 +151,7 @@ int main(int argc, char **argv)
 
 	      // Overwrite Z velocity if time to land or stop control
 	      if(land_now > 0){
-		twist_pub = twist_zero;
-		twist_pub.twist.linear.z = -1;
+		  twist_pub.twist.linear.z = -1.0;
 	      }	
 	      if(zero_vel > 0){twist_pub = twist_zero;}
 
