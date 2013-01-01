@@ -44,10 +44,17 @@ void transformer(const geometry_msgs::Pose tag_pose, const geometry_msgs::Pose b
 {
   t_pose = tag_pose;//*
   b_pose = body_pose;
-  
+  ROS_INFO("B_pose X:%f, B Y:%f, B Z:%f", b_pose.position.x,
+           b_pose.position.y,
+           b_pose.position.z);
+
   tf_1.position.x = (t_pose.position.x+1)*0.0254;
   tf_1.position.y = (1-t_pose.position.y)*0.0254;
   tf_1.position.z = (-2-t_pose.position.z)*0.0254;
+
+  ROS_INFO("tf_1 X:%f, tf_1 Y:%f, tf_1 Z:%f", tf_1.position.x,
+	   tf_1.position.y,
+	   tf_1.position.z);
 
   float t_x = tf_1.position.x;
   float t_y = tf_1.position.y;
@@ -56,6 +63,8 @@ void transformer(const geometry_msgs::Pose tag_pose, const geometry_msgs::Pose b
   yy = b_pose.orientation.x;  //yaw
   pp = b_pose.orientation.y;  //pitch
   rr = b_pose.orientation.z;  //roll
+
+  ROS_INFO("yaw:%f, pitch:%f, roll:%f", yy, pp, yy);
 
   tf_OA.position.x = (cos(yy)*cos(pp))*t_x + (cos(yy)*sin(pp)*sin(rr)-sin(yy)*cos(rr))*t_y;
   tf_OA.position.x = tf_OA.position.x + (cos(yy)*sin(pp)*cos(rr)+sin(yy)*sin(rr))*t_z + b_pose.position.x;
@@ -98,9 +107,9 @@ int main(int argc, char **argv)
     zero_pose.pose.position.z = current_position.pose.position.z;
 
     geometry_msgs::PoseStamped ref_pose;
-    ROS_INFO("X:%f, Y:%f, Z:%f", current_position.pose.position.x,
-    	current_position.pose.position.y,
-	current_position.pose.position.z);
+    // ROS_INFO("X:%f, Y:%f, Z:%f", current_position.pose.position.x,
+    //	current_position.pose.position.y,
+    //	current_position.pose.position.z);
     ref_pose.pose.position.x = current_position.pose.position.x + tag_position.position.x/100; //CHECK UNITs
     ref_pose.pose.position.y = current_position.pose.position.y + tag_position.position.y/100;
     ref_pose.pose.position.z = current_position.pose.position.z + tag_position.position.z/100;
@@ -169,10 +178,49 @@ int main(int argc, char **argv)
 /*	ROS_INFO("Ref-X:%f Ref-Y:%f Ref-Z:%f", ref_pose.pose.position.x, 
            ref_pose.pose.position.y, 
            ref_pose.pose.position.z);*/
-	ROS_INFO("Tag-X:%f Tag-Y:%f Tag-Z:%f", tag_position.position.x,
+	/*ROS_INFO("Tag-X:%f Tag-Y:%f Tag-Z:%f", tag_position.position.x,
 	   tag_position.position.y,
-	   tag_position.position.z);
+	   tag_position.position.z);*/
 
+	//
+	t_pose = tag_position;//*                       
+	b_pose = current_position.pose;
+	ROS_INFO("B_pose X:%f, B Y:%f, B Z:%f", b_pose.position.x,
+		 b_pose.position.y,
+		 b_pose.position.z);
+
+	tf_1.position.x = (t_pose.position.x+1)*0.0254;
+	tf_1.position.y = (1-t_pose.position.y)*0.0254;
+	tf_1.position.z = (-2-t_pose.position.z)*0.0254;
+
+	ROS_INFO("tf_1 X:%f, tf_1 Y:%f, tf_1 Z:%f", tf_1.position.x,
+		 tf_1.position.y,
+		 tf_1.position.z);
+
+	float t_x = tf_1.position.x;
+	float t_y = tf_1.position.y;
+	float t_z = tf_1.position.z;
+
+	yy = b_pose.orientation.x;  //yaw                                                                                                           
+	pp = b_pose.orientation.y;  //pitch                                                                                                         
+	rr = b_pose.orientation.z;  //roll                                                                                                          
+
+	ROS_INFO("yaw:%f, pitch:%f, roll:%f", yy, pp, yy);
+
+	tf_OA.position.x = (cos(yy)*cos(pp))*t_x + (cos(yy)*sin(pp)*sin(rr)-sin(yy)*cos(rr))*t_y;
+	tf_OA.position.x = tf_OA.position.x + (cos(yy)*sin(pp)*cos(rr)+sin(yy)*sin(rr))*t_z + b_pose.position.x;
+	tf_OA.position.y = (sin(yy)*cos(pp))*t_x + (sin(yy)*sin(pp)*sin(rr)+cos(yy)*cos(rr))*t_y;
+	tf_OA.position.y = tf_OA.position.y + (sin(yy)*sin(pp)*cos(rr)-cos(yy)*sin(rr))*t_z + b_pose.position.y;
+	tf_OA.position.z = (-sin(pp))*t_x + (cos(pp)*sin(rr))*t_y + (cos(pp)*cos(rr))*t_z + b_pose.position.z;
+	//
+	//transformer(tag_position, current_position.pose);
+	tf_f.pose.position.x = tf_OA.position.x;
+	tf_f.pose.position.y = tf_OA.position.y;
+	tf_f.pose.position.z = tf_OA.position.z;
+
+	ROS_INFO("X:%f, Y:%f, Z:%f", tf_f.pose.position.x,
+		 tf_f.pose.position.y,
+		 tf_f.pose.position.z);
         ros::spinOnce();
         rate.sleep();
     }
