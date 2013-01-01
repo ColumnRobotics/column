@@ -129,7 +129,6 @@ int main(int argc, char **argv)
         ref_pose.pose.position.x = current_position.pose.position.x - avg_april_pose_x/100; //CHECK UNITs
         ref_pose.pose.position.y = current_position.pose.position.y + avg_april_pose_y/100;
         ref_pose.pose.position.z = current_position.pose.position.z; //+ tag_position.position.z/100;
-        local_pos_pub.publish(ref_pose);
 /*	ROS_INFO("Ref-X:%f Ref-Y:%f Ref-Z:%f", ref_pose.pose.position.x, 
            ref_pose.pose.position.y, 
            ref_pose.pose.position.z);*/
@@ -138,6 +137,8 @@ int main(int argc, char **argv)
 	   avg_april_pose_y,
 	   tag_position.position.z);
 	}
+
+        local_pos_pub.publish(ref_pose);
 
         ros::spinOnce();
         rate.sleep();
