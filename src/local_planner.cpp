@@ -200,6 +200,7 @@ int main(int argc, char **argv)
           last_error_yaw = error_yaw;
 
 	      // Overwrite Z velocity if time to land or stop control
+	      if(zero_vel > 0){twist_pub.twist.linear.z = 0.0;} // twist_zero;}
 	      if(land_now > 0){
               //twist_pub.twist.linear.x = 0.0;
               //twist_pub.twist.linear.y = 0.0;
@@ -207,7 +208,6 @@ int main(int argc, char **argv)
               ros::param::getCached("/land_z_vel", land_z_vel);
               twist_pub.twist.linear.z = -land_z_vel;
 	      }	
-	      if(zero_vel > 0){twist_pub = twist_zero;}
 
               // Actually publish velocity commands
 	      set_vel_pub.publish(twist_pub);
