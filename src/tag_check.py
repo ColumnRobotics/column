@@ -15,7 +15,8 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 def april_cb(msg):
     rospy.loginfo("Tag Detected")
     rospy.set_param('/tag_detect', 1)
-    rospy.set_param('/filtered_tag_x', msg.pose.pose.position.x)
+    # Saving all values in X right, Y forwards frame
+    rospy.set_param('/filtered_tag_x', -1.0 * msg.pose.pose.position.x)
     rospy.set_param('/filtered_tag_y', msg.pose.pose.position.y)
 
 def listener():

@@ -123,7 +123,11 @@ int main(int argc, char **argv)
 	    ros::param::getCached("/y_rel_setpoint",      y_rel_setpoint);
 	    ros::param::getCached("/z_rel_setpoint",      z_rel_setpoint);
 	    ros::param::getCached("/theta_rel_setpoint",  theta_rel_setpoint);
-	   
+	    //Convert from X=Right, Y=Forwards to X=Left, Y=Backwards (quad ros frame)
+        x_rel_setpoint = -x_rel_setpoint;
+        y_rel_setpoint = -y_rel_setpoint;
+
+
 	    int land_now, zero_vel;
 	    ros::param::getCached("/land_now", land_now);
 	    ros::param::getCached("/zero_vel", zero_vel);

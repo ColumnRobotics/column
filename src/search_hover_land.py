@@ -33,13 +33,15 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         # Home in on tag then land instead, if tag detected
         if rospy.get_param('/tag_detect') == 1:
             rospy.loginfo("Homing in on April Tag!!")
-            
-            rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
-            rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
+            # TODO: Fix this crummy logic (compare location when tag was filtered)
+            new_rel_setpoint_x = rospy.get_param('/x_rel_setpoint') - rospy.get_param('/filtered_tag_x')
+            new_rel_setpoint_y = rospy.get_param('/y_rel_setpoint') - rospy.get_param('/filtered_tag_y')
+            rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
+            rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
             # Give 2 seconds to stabilize
            # rospy.set_param('/x_rel_setpoint', rospy.get_param('/filtered_tag_x'))
            # rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
-           time.sleep(2) 
+            time.sleep(2) 
 
             land_now()
         else:
