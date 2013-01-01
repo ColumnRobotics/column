@@ -126,8 +126,8 @@ def center_on_dock(interpolate=False, last_center=None):
             command_path(current_setpoint, (new_rel_setpoint_x, new_rel_setpoint_y),
                          speed_mps=0.2, tag_seen=True)
         elif last_center is not None:  # Leaky integrator over three setpoints
-            rospy.set_param('/x_rel_setpoint', (new_rel_setpoint_x + last_center[0] * 4) / 5) #Originaly 2/3
-            rospy.set_param('/y_rel_setpoint', (new_rel_setpoint_y + last_center[1] * 4) / 5)
+            rospy.set_param('/x_rel_setpoint', (new_rel_setpoint_x + last_center[0] * 7) / 8) #Originaly 2/3, better 4/5
+            rospy.set_param('/y_rel_setpoint', (new_rel_setpoint_y + last_center[1] * 7) / 8)
             rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
         else:
             rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     #rospy.set_param('/control_gains/d', 2)
     time.sleep(2) # Pause 
     # Hold position over april tag for 5 seconds
-    for _ in range(5):
+    for _ in range(3):#was 5
         initial_center = center_on_dock(last_center=initial_center) 
         time.sleep(1)
 
