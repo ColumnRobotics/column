@@ -119,7 +119,11 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped initial_position = current_position;
     float des_yaw = getYaw(current_position.pose);
     float initial_yaw = des_yaw;
-
+    ros::param::set("/x_init",     -initial_position.pose.position.x);
+    ros::param::set("/y_init",     -initial_position.pose.position.y);
+    ros::param::set("/z_init",     initial_position.pose.position.z);
+    ros::param::set("/yaw_init",  initial_yaw);
+	
     ROS_INFO("Offboard mode enabled! ");
     ros::param::set("/offboard", 1);   //
 

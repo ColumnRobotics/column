@@ -35,7 +35,10 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
     camera_position_in_tag_frame_stamped = *pose;
     reading_vec.push_back(camera_position_in_tag_frame_stamped);
     // Get the pose estimate from the Body Pose Filter
-    if(reading_vec.size() >= num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2)    
+    //ROS_INFO("Time Difference: %f", fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec));
+    //ROS_INFO("First time: %d", reading_vec[0].header.stamp.sec);
+    //ROS_INFO("Last time: %d", reading_vec[reading_vec.size()-1].header.stamp.sec);
+    if(reading_vec.size() >= num_filtered && abs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2)    
     {
         if(reading_vec.size() > num_filtered)
           reading_vec.pop_front();

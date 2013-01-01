@@ -106,19 +106,16 @@ def cone_search():
 
 def attempt_land():
     while 1:
+        time = rospy.get_param('/pose_last_tagupdate_time')
         if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
             rospy.loginfo("Homing in on April Tag!!")
-            new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x')
-            new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') + rospy.get_param('/filtered_tag_y')
-            new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw') + rospy.get_param('/filtered_tag_yaw')
-        else: # Hold position until you get a good reading
-            rospy.loginfo("Wait for readings!!")
-            new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x')
-            new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y')
-            new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw')
-        rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
-        rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
-        rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
+            new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') - rospy.get_param('/filtered_tag_x') - rospy.get_param('/x_init')
+            new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') - rospy.get_param('/filtered_tag_y') - rospy.get_param('/y_init')
+            new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw') - rospy.get_param('/filtered_tag_yaw') - rospy.get_param('yaw_init')
+            rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
+            rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
+            rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
+        time.sleep(0.1)
 
 # Main function.
 if __name__ == '__main__':
