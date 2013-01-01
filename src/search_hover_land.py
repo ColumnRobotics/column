@@ -46,17 +46,20 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
                # land_now()
         '''
         if rospy.get_param('/tag_detect') == 1:
-            new_rel_setpoint_x = rospy.get_param('/pose_at_tagupdate_x')
-            new_rel_setpoint_y = rospy.get_param('/pose_at_tagupdate_y')
+            new_rel_setpoint_x = rospy.get_param('/pose_at_tagupdate_x') - rospy.get_param('/initial_pose_x')
+            new_rel_setpoint_y = rospy.get_param('/pose_at_tagupdate_y') - rospy.get_param('/initial_pose_y')
             new_rel_setpoint_yaw = rospy.get_param('/pose_at_tagupdate_yaw')
             while 1:
                 rospy.loginfo("Tag Detected")
                 if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
                     #time1 = rospy.get_param("/pose_last_tagupdate_time")
                     rospy.loginfo("Homing in on April Tag!!")
-                    new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x')
-                    new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') + rospy.get_param('/filtered_tag_y')
+                    new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x') - rospy.get_param('/initial_pose_x')
+                    new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') + rospy.get_param('/filtered_tag_y') - rospy.get_param('/initial_pose_y')
                     new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw') + rospy.get_param('/filtered_tag_yaw')
+                    #new_rel_setpoint_x = rospy.get_param('/filtered_tag_x')
+                    #new_rel_setpoint_y = rospy.get_param('/filtered_tag_y')
+                    #new_rel_setpoint_yaw = rospy.get_param('/filtered_tag_yaw')
                     #time2 = rospy.get_param("/pose_last_tagupdate_time")
                     #if abs(time1 - time2) > epsilon:
                     #    rospy.loginfo("tag times not yet equvalent") 
@@ -94,6 +97,10 @@ def cone_search():
         else:
             break
 
+
+    rospy.set_param('/initial_pose_x', rospy.get_param('/pose_last_tagupdate_x'))
+    rospy.set_param('/initial_pose_y', rospy.get_param('/pose_last_tagupdate_y'))
+    rospy.loginfo("Setting Initial poses");
     # Forward expanding cone search path (forward 2.4m, out +/- 0.9m)
     # X Y Z here is RIGHT FORWARDS UP    (mavros frame X, Y is negative)
     xy_setpoints = [( 0.0,  0.0),
@@ -125,5 +132,9 @@ if __name__ == '__main__':
 #        rospy.set_param('/x_rel_setpoint', float(0))
 #        rospy.set_param('/y_rel_setpoint', float(0))
 #        rospy.set_param('/yaw_rel_setpoint', float(0))
+
+    #rospy.set_param('/initial_pose_x', rospy.get_param('pose_last_tagupdate_x'))
+    #rospy.set_param('/initial_pose_y', rospy.get_param('pose_last_tagupdate_y'))
+    #rospy.set_param('/x_rel_setpoint', rospy.get_paam('pose_last_tagupdate_yaw'))
     cone_search()
 

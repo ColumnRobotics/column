@@ -31,3 +31,13 @@ pose_at_tagupdate_z: 0.0
 pose_at_tagupdate_yaw: 0.0
 #pose_last_tagupdate_time: -1000.0
 
+pose_last_tagupdate_x: 0.0   # Default Value. Don't ever go to these
+pose_last_tagupdate_y: 0.0
+#pose_last_tagupdate_z: 0.0
+pose_last_tagupdate_yaw: 0.0
+
+initial_pose_x: 0.0
+initial_pose_y: 0.0
+initial_pose_z: 0.0
+initial_pose_yaw: 0.0
+

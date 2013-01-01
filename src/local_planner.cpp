@@ -117,6 +117,9 @@ int main(int argc, char **argv)
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
     geometry_msgs::PoseStamped initial_position = current_position;
+    //ros::param::set("/initial_pose_x", current_position.pose.position.x);
+    //ros::param::set("/initial_pose_y", current_position.pose.position.y);
+    
     float des_yaw = getYaw(current_position.pose);
     float initial_yaw = des_yaw;
 
