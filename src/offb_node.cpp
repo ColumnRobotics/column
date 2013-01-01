@@ -32,15 +32,19 @@ void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
     // Get the tag position in the camera frame
     tag_position_in_camera_frame = *pose;
     // Get the camera position in the camera frame
-    tf::Quaternion Q = tf::Quaternion(tag_position_in_camera_frame.orientation.x,
-	tag_position_in_camera_frame.orientation.y, tag_position_in_camera_frame.orientation.z,
-	tag_position_in_camera_frame.orientation.w);
-    tf::Matrix3x3 R = tf::Matrix3x3(Q); // Get the rotation matrix
-    R.getRPY(roll,pitch,yaw);
+    //tf::Quaternion Q = tf::Quaternion(tag_position_in_camera_frame.orientation.x,
+    //	tag_position_in_camera_frame.orientation.y, tag_position_in_camera_frame.orientation.z,
+    //	tag_position_in_camera_frame.orientation.w);
+    tf::Matrix3x3 R = tf::Matrix3x3(); // Get the rotation matrix
+    yaw = tag_position_in_camera_frame.orientation.x;
+    pitch = tag_position_in_camera_frame.orientation.y;
+    roll = tag_position_in_camera_frame.orientation.z;
+    //R.getRPY(roll,pitch,yaw);
+    R.setEulerYPR(yaw, pitch, roll);
     R = R.inverse();
     //R.getRPY(roll,pitch,yaw);
-    ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f",
-	roll*180/3.1415926, pitch*180/3.1415926, yaw*180/3.1415926);
+    //ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f",
+    //	roll*180/3.1415926, pitch*180/3.1415926, yaw*180/3.1415926);
     camera_position_in_tag_frame.position.x = (R[0][0]*tag_position_in_camera_frame.position.x +
         R[0][1]*tag_position_in_camera_frame.position.y +
         R[0][2]*tag_position_in_camera_frame.position.z) * 0.0254;
@@ -121,10 +125,10 @@ int main(int argc, char **argv)
         	//set_vel_pub.publish(command_twist);
 	}
 	// Print the camera position in the tag frame: X, Y, Z
-	//ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
-	//    camera_position_in_tag_frame.position.x,
-        //    camera_position_in_tag_frame.position.y,
-        //    camera_position_in_tag_frame.position.z);
+	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
+	    camera_position_in_tag_frame.position.x,
+            camera_position_in_tag_frame.position.y,
+            camera_position_in_tag_frame.position.z);
 
         ros::spinOnce();
         rate.sleep();
