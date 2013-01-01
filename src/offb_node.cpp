@@ -87,8 +87,9 @@ int main(int argc, char **argv)
             ("mavros/local_position/local", 10, position_cb);
 
     //the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(100.0);
-    int publish_skip = 25; //Publish only every 2 seconds
+    float rate_hz = 100.0;
+    ros::Rate rate(rate_hz);
+    int publish_skip = int(rate_hz / 2); //Publish only every 2 seconds
     int publish_idx = 0;
     
     float avg_april_pose_x = 0.0; 
@@ -120,21 +121,28 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    float kp = 2.0;
+    float kp = 4.0;
+    float kd = 1.0;
+    float last_error_x = 0.0;
+    float last_error_y = 0.0;
+    float last_error_z = 0.0;
+    float derr_x = 0.0;
+    float derr_y = 0.0;
+    float derr_z = 0.0;
+
 
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
     geometry_msgs::PoseStamped initial_position = current_position;
-
     ROS_INFO("Offboard mode enabled! ");
 
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
       float t_start = 4.0;
-      float t_land = t_start + 18.0;
+      float t_land = t_start + 24.0;
      //Set desired position sequence 
-      if(time > t_start){ //No changes for first 2 seconds
+      /*if(time > t_start){ //No changes for first 2 seconds
 	if(time < t_start+4){
          des_position.pose.position.x = initial_position.pose.position.x + 0.3;
 	}
@@ -150,12 +158,23 @@ int main(int argc, char **argv)
           des_position.pose.position.x = initial_position.pose.position.x + 0.0;
           des_position.pose.position.y = initial_position.pose.position.y + 0.0;
 	}
-       }
+       }*/
 	//P velocity controller to des_position setpoint
       twist_pub = twist_zero;
-      twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
-      twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
-      twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
+      float error_x = des_position.pose.position.x - current_position.pose.position.x;
+      float error_y = des_position.pose.position.y - current_position.pose.position.y;
+      float error_z = des_position.pose.position.z - current_position.pose.position.z;
+      //low-pass filter derr_x over 5 steps
+      derr_x = ((4.0*derr_x + (error_x - last_error_x)*rate_hz) / 5.0); 
+      derr_y = ((4.0*derr_y + (error_y - last_error_y)*rate_hz) / 5.0);
+      derr_z = ((4.0*derr_z + (error_z - last_error_z)*rate_hz) / 5.0);
+      twist_pub.twist.linear.x = kp * error_x  +  kd * derr_x;
+      twist_pub.twist.linear.y = kp * error_y  +  kd * derr_y;
+      twist_pub.twist.linear.z = kp * error_z  +  kd * derr_z;
+      last_error_x = error_x;
+      last_error_y = error_y;
+      last_error_z = error_z;
+
       // Overwrite Z velocity if time to land
       if(time > t_land + 2){twist_pub = twist_zero;} // Stop props after landing
       if(time > t_land    ){twist_pub.twist.linear.z = -1;}	
@@ -166,9 +185,9 @@ int main(int argc, char **argv)
 	publish_idx++;
 	if(publish_idx % publish_skip == 0){ 
         ROS_INFO("Time (s): %f", time);
-        ROS_INFO("Cmd velocities:   vx:%f vy:%f vz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
-        ROS_INFO("Current Position:  x:%f  y:%f  z:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z);
-        ROS_INFO("Desired Position:  x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
+        ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
+        ROS_INFO("Current Pos:  x:%f  y:%f  z:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z);
+        ROS_INFO("Desired Pos:  x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
 	}
 	
         ros::spinOnce();
