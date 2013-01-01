@@ -114,7 +114,6 @@ int main(int argc, char **argv)
     twist_zero.twist.angular.z = 0.0;
 
     geometry_msgs::TwistStamped twist_pub = twist_zero;
-
     //send a few setpoints before starting
     while(current_state.mode != "OFFBOARD" && ros::ok()){
         set_vel_pub.publish(twist_zero);
@@ -135,6 +134,7 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped des_position = current_position;
     geometry_msgs::PoseStamped initial_position = current_position;
     ROS_INFO("Offboard mode enabled! ");
+    ros::param::set("/offboard", 1);   //
 
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
