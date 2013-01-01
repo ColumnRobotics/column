@@ -49,6 +49,19 @@ float getYaw(geometry_msgs::Pose pose)
     return (float)ypr[0];
 }
 
+double normalize_angle_positive(double angle)
+{
+    return fmod(fmod(angle, 2.0*M_PI) + 2.0*M_PI, 2.0*M_PI);
+}
+
+double normalize_angle(double angle)
+{
+    double a = normalize_angle_positive(angle);
+    if (a > M_PI)
+        a -= 2.0 *M_PI;
+    return a;
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offb_node");
@@ -113,6 +126,7 @@ int main(int argc, char **argv)
     float derr_y = 0.0;
     float derr_z = 0.0;
     float derr_yaw = 0.0;
+    float curr_yaw = 0.0;
 
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
@@ -155,14 +169,15 @@ int main(int argc, char **argv)
 	    des_position.pose.position.x = initial_position.pose.position.x + x_rel_setpoint;
 	    des_position.pose.position.y = initial_position.pose.position.y + y_rel_setpoint;
 	    des_position.pose.position.z = initial_position.pose.position.z + z_rel_setpoint;
-        des_yaw = initial_yaw + yaw_rel_setpoint;
+        des_yaw = normalize_angle(normalize_angle(initial_yaw) + normalize_angle(yaw_rel_setpoint));
+        curr_yaw = getYaw(current_position.pose);
 
 		//P velocity controller to des_position setpoint
 	      twist_pub = twist_zero;
 	      float error_x = des_position.pose.position.x - current_position.pose.position.x;
 	      float error_y = des_position.pose.position.y - current_position.pose.position.y;
 	      float error_z = des_position.pose.position.z - current_position.pose.position.z;
-          float error_yaw = des_yaw - getYaw(current_position.pose);
+          float error_yaw = des_yaw - curr_yaw;
 	      
           //low-pass filter derr_x over 5 steps
 	      derr_x = ((4.0*derr_x + (error_x - last_error_x)*rate_hz) / 5.0); 
@@ -193,8 +208,8 @@ int main(int argc, char **argv)
 		if(publish_idx % publish_skip == 0){ 
 			ROS_INFO("Time (s): %f", time);
 			ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f wz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z, twist_pub.twist.angular.z);
-			ROS_INFO("Current Pos:  x:%f  y:%f  z:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z);
-			ROS_INFO("Desired Pos:  x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
+			ROS_INFO("Current Pos:  x:%f  y:%f  z:%f yaw:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z, curr_yaw);
+			ROS_INFO("Desired Pos:  x:%f  y:%f  z:%f yaw:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z, des_yaw);
 		}
 		
 		ros::spinOnce();
