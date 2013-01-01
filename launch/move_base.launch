@@ -20,6 +20,5 @@
     <rosparam file="$(find column)/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find column)/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find column)/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find column)/base_local_planner_params.yaml" command="load" />
   </node>
 </launch>
