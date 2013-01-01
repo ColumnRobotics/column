@@ -48,6 +48,11 @@ int main(int argc, char **argv)
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
+    int publish_skip = 40; //Publish only every 2 seconds
+    int publish_idx = 0;
+    
+    float avg_april_pose_x = 0.0; 
+    float avg_april_pose_y = 0.0;
 
     // wait for FCU connection
     while(ros::ok() && current_state.connected){
@@ -115,17 +120,24 @@ int main(int argc, char **argv)
 	 //zero_pose.pose.position.x = current_position.pose.position.x;
          //zero_pose.pose.position.y = current_position.pose.position.y;
          //zero_pose.pose.position.z = current_position.pose.position.z;
+	
+	avg_april_pose_x = (publish_skip * avg_april_pose_x + tag_position.position.x) / (publish_skip + 1);
+	avg_april_pose_y = (publish_skip * avg_april_pose_y + tag_position.position.y) / (publish_skip + 1);
 
-        ref_pose.pose.position.x = 100 + current_position.pose.position.x + tag_position.position.x/100; //CHECK UNITs
-        ref_pose.pose.position.y = current_position.pose.position.y + tag_position.position.y/100;
-        ref_pose.pose.position.z = current_position.pose.position.z + tag_position.position.z/100;
+	publish_idx++;
+        if((publish_idx % publish_skip) == 0){
+        ref_pose.pose.position.x = current_position.pose.position.x - avg_april_pose_x/100; //CHECK UNITs
+        ref_pose.pose.position.y = current_position.pose.position.y + avg_april_pose_y/100;
+        ref_pose.pose.position.z = current_position.pose.position.z; //+ tag_position.position.z/100;
         local_pos_pub.publish(ref_pose);
 /*	ROS_INFO("Ref-X:%f Ref-Y:%f Ref-Z:%f", ref_pose.pose.position.x, 
            ref_pose.pose.position.y, 
            ref_pose.pose.position.z);*/
-	ROS_INFO("Tag-X:%f Tag-Y:%f Tag-Z:%f", tag_position.position.x,
-	   tag_position.position.y,
+	
+	   ROS_INFO("avg Tag-X:%f avg Tag-Y:%f Tag-Z:%f", avg_april_pose_x,
+	   avg_april_pose_y,
 	   tag_position.position.z);
+	}
 
         ros::spinOnce();
         rate.sleep();
