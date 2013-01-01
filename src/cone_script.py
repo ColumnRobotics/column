@@ -7,10 +7,29 @@ Example Python node to listen on a specific topic.
 # Import required Python code.
 import rospy
 import time
+import numpy as np
 from mavros_msgs.msg import State
 from geometry_msgs.msg import Pose
 import mavros 
+import subprocess
 
+def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
+    """
+    Setpoints as (x, y) tuples to be sent to /?_rel_setpoint parameter
+    """
+    path_length = np.sqrt((start_setpoint[0] - end_setpoint[0])**2 +
+                          (start_setpoint[1] - end_setpoint[1])**2)
+    duration_s = path_length * speed_mps
+
+    # Create interpolated position arrays with 10 * duration(seconds) points
+    x_array = np.linspace(start_setpoint[0], end_setpoint[0], duration_s*10.0);
+    y_array = np.linspace(start_setpoint[1], end_setpoint[1], duration_s*10.0);
+    
+    for i in range(len(x_array)):
+        # Apply setpoint parameters at 10 Hz
+        rospy.set_param('/x_rel_setpoint', float(x_array[i])) 
+        rospy.set_param('/y_rel_setpoint', float(y_array[i])) 
+        time.sleep(0.1)
 
 def cone_search():
     '''
@@ -22,34 +41,28 @@ def cone_search():
         if rospy.get_param('/offboard') < 1:
             print "Still Waiting for Offboard"
         else:
-            time.sleep(3)
-            print "Setpoint 1"
-            rospy.set_param('/x_rel_setpoint', -0.3) 
-            rospy.set_param('/y_rel_setpoint', 0) 
+            break
 
-            time.sleep(3)
-            rospy.set_param('/x_rel_setpoint', -0.3) 
-            rospy.set_param('/y_rel_setpoint', -0.3) 
+    # Square-shaped cone search path
+    xy_setpoints = [( 0.0,  0.0),
+                    (-0.3,  0.0),
+                    (-0.3, -0.3),
+                    ( 0.3, -0.3),
+                    ( 0.3, -0.6),
+                    ( 0.0, -0.6)]
 
-            time.sleep(3)
-            print "Setpoint 3"
-            rospy.set_param('/x_rel_setpoint', 0.3) 
-            rospy.set_param('/y_rel_setpoint', -0.3) 
+    # Visit each setpoint
+    for i in range(len(xy_setpoints)-1):
+        rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
+                                                      xy_setpoints[i+1][1]) 
+        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.2);
+        time.sleep(2)
 
-            time.sleep(3)
-            rospy.set_param('/x_rel_setpoint', 0.3) 
-            rospy.set_param('/y_rel_setpoint', -0.6) 
-
-            time.sleep(3)
-            rospy.set_param('/x_rel_setpoint', 0.0) 
-            rospy.set_param('/y_rel_setpoint', -0.6) 
-
-            time.sleep(3)
-            print "Landing Now"
-            rospy.set_param('/land_now', 1)
-            time.sleep(2)
-            rospy.set_param('/zero_vel', 1)
-
+    print "Landing Now"
+    rospy.set_param('/land_now', 1)
+    time.sleep(2.5)
+    print "Setting zero velocity target"
+    rospy.set_param('/zero_vel', 1)
 
 # Main function.
 if __name__ == '__main__':
