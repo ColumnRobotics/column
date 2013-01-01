@@ -29,6 +29,9 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         # Apply setpoint parameters at 10 Hz
         
         # Home in on tag then land instead, if tag detected
+        #LAST-MINUTE CHANGE HERE
+        if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
+            return
         '''
         if rospy.get_param('/filtered_detect') == 1:
             rospy.loginfo("Homing in on April Tag!!")
@@ -107,11 +110,15 @@ def cone_search():
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):
-        if rospy.get_param('/tag_detect') == 1:  #### Use /filtered_detect instead
+        #LAST-MINUTE CHANGE HERE: changed tag_detect to filtered_detect
+        if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
             return
         rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
                                                       xy_setpoints[i+1][1]) 
-        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.1)
+        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.15)
+        #LAST-MINUTE CHANGE HERE: Allow break out before 2 second sleep
+        if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
+            return
         time.sleep(2)
 
 def attempt_land():
@@ -145,6 +152,9 @@ if __name__ == '__main__':
     time.sleep(2)
     rospy.loginfo("Move to pre-dock")
     attempt_land() # move to predock
-    time.sleep(2.5)
+    time.sleep(2)
+    rospy.loginfo("re-center over dock")
+    attempt_land() # move to predock
+    time.sleep(2)
     rospy.loginfo("Land")
     land_now()
