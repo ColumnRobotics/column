@@ -160,9 +160,9 @@ if __name__ == '__main__':
     time.sleep(2) # Pause 
     rospy.loginfo("Move to pre-dock")
     initial_center = center_on_dock(interpolate=True)
-    rospy.set_param('/max_xy_vel', 0.2)
-    #rospy.set_param('/control_gains/p', 3) # Reduce gains for more gentle movement
-    #rospy.set_param('/control_gains/d', 1)
+    rospy.set_param('/max_xy_vel', 0.5)
+    rospy.set_param('/control_gains/p', 7)
+    rospy.set_param('/control_gains/d', 2)
     time.sleep(2) # Pause 
     # Hold position over april tag for 5 seconds
     for _ in range(5):
@@ -171,21 +171,9 @@ if __name__ == '__main__':
 
     rospy.loginfo("Land")
     rospy.set_param('/land_now', 1)
-    for _ in range(4):
+    #for _ in range(4):
+    while not rospy.is_shutdown():
         time.sleep(0.3)
         initial_center = center_on_dock(last_center=initial_center) 
 
-    rospy.set_param('/zero_vel', 1) # Prevent suddenly rising back to target height
-    rospy.set_param('/land_now', 0)
-    for _ in range(5):
-        time.sleep(0.3)
-        initial_center = center_on_dock(last_center=initial_center) 
-    
-    rospy.loginfo("Final Landing Sequence")
-    rospy.set_param('/land_z_vel', 0.5)
-    rospy.set_param('/land_now', 1)
-    rospy.set_param('/zero_vel', 0)
-    while not rospy.is_shutdown():
-        time.sleep(0.3)
-        center_on_dock() 
 

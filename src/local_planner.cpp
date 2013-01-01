@@ -192,7 +192,7 @@ int main(int argc, char **argv)
           //Clamp x and y to +/- max_xy_vel
 	      twist_pub.twist.linear.x = std::max(std::min(kp * error_x  +  kd * derr_x, max_xy_vel), -max_xy_vel);
 	      twist_pub.twist.linear.y = std::max(std::min(kp * error_y  +  kd * derr_y, max_xy_vel), -max_xy_vel);
-	      twist_pub.twist.linear.z = kp * error_z  +  kd * derr_z;
+	      twist_pub.twist.linear.z = 0.5*(kp * error_z  +  kd * derr_z);
           twist_pub.twist.angular.z = kp_yaw * error_yaw + kd_yaw * derr_yaw;
 	      last_error_x = error_x;
 	      last_error_y = error_y;
