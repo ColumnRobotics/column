@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(100.0);
-    int publish_skip = 50; //Publish only every 2 seconds
+    int publish_skip = 25; //Publish only every 2 seconds
     int publish_idx = 0;
     
     float avg_april_pose_x = 0.0; 
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    float kp = 1.0;
+    float kp = 2.0;
 
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
@@ -131,35 +131,34 @@ int main(int argc, char **argv)
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
-      bool land_now = 0;
+      float t_start = 4.0;
+      float t_land = t_start + 18.0;
      //Set desired position sequence 
-      if(time > 2){ //No changes for first 2 seconds
-	if(time < 4){
-          des_position.pose.position.x = initial_position.pose.position.x + 0.5;
+      if(time > t_start){ //No changes for first 2 seconds
+	if(time < t_start+4){
+         des_position.pose.position.x = initial_position.pose.position.x + 0.3;
 	}
-	else if(time < 8){
-          des_position.pose.position.x = initial_position.pose.position.x + 0.5;
-          des_position.pose.position.y = initial_position.pose.position.y + 0.5;
+	else if(time < t_start+8){
+          des_position.pose.position.x = initial_position.pose.position.x + 0.3;
+          des_position.pose.position.y = initial_position.pose.position.y + 0.3;
 	}
-	else if(time < 12){
+	else if(time < t_start+12){
           des_position.pose.position.x = initial_position.pose.position.x + 0.0;
-          des_position.pose.position.y = initial_position.pose.position.y + 0.5;
+          des_position.pose.position.y = initial_position.pose.position.y + 0.3;
 	}
-	else if(time < 16){
-          des_position.pose.position.x = initial_position.pose.position.x + 0;
-          des_position.pose.position.y = initial_position.pose.position.y + 0;
+	else{
+          des_position.pose.position.x = initial_position.pose.position.x + 0.0;
+          des_position.pose.position.y = initial_position.pose.position.y + 0.0;
 	}
-        else{
-	  land_now = 1;
-	} 
        }
 	//P velocity controller to des_position setpoint
       twist_pub = twist_zero;
       twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
       twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
       twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
-      // Overwrite Z velocity if land_now == 1
-      if(land_now){twist_pub.twist.linear.z = -1;}	
+      // Overwrite Z velocity if time to land
+      if(time > t_land + 2){twist_pub = twist_zero;} // Stop props after landing
+      if(time > t_land    ){twist_pub.twist.linear.z = -1;}	
 
       set_vel_pub.publish(twist_pub);
 
@@ -168,7 +167,8 @@ int main(int argc, char **argv)
 	if(publish_idx % publish_skip == 0){ 
         ROS_INFO("Time (s): %f", time);
         ROS_INFO("Cmd velocities:   vx:%f vy:%f vz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
-        ROS_INFO("Position Setpoint: x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
+        ROS_INFO("Current Position:  x:%f  y:%f  z:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z);
+        ROS_INFO("Desired Position:  x:%f  y:%f  z:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z);
 	}
 	
         ros::spinOnce();
