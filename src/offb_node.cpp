@@ -52,7 +52,7 @@ int main(int argc, char **argv)
             ("mavros/local_position/local", 10, position_cb);
 
     //the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(20.0);
+    ros::Rate rate(100.0);
     int publish_skip = 5*20; //Publish only every 2 seconds
     int publish_idx = 0;
     
@@ -90,7 +90,9 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    
+    float kp = 1.0;
+    geometry_msgs::PoseStamped des_position = current_position;
+//    des_position.pose.position.x += 0.5;
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
@@ -100,15 +102,20 @@ int main(int argc, char **argv)
 	  twist_pub = twist_zero;
         }
 	else if(time < 1){
-	  twist_pub = twist_y; //was x
+	  twist_pub = twist_x; //was x
 	}
 	//else if(time < 2){
 	//  twist_pub = twist_zero;
 	//}
 	else if(time < 3){
-	  twist_pub = twist_y;
+	  twist_pub = twist_x;
 	}
       }
+      twist_pub = twist_zero;
+      twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
+      twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
+      twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
+
       set_vel_pub.publish(twist_pub);
       ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
       ros::spinOnce();
