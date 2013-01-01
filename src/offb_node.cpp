@@ -132,9 +132,10 @@ int main(int argc, char **argv)
 	    camera_position_in_tag_frame.position.x,
             camera_position_in_tag_frame.position.y,
             camera_position_in_tag_frame.position.z);
-
+      twist_pub = twist_zero;
+ 
       if(current_state.mode == "OFFBOARD"){
-	if(time < 0){
+/*	if(time < 0){
 	  twist_pub = twist_zero;
         }
 	else if(time < 1){
@@ -146,12 +147,12 @@ int main(int argc, char **argv)
 	else if(time < 3){
 	  twist_pub = twist_x;
 	}
+*/
+        twist_pub = twist_zero;
+      	twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
+      	twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
+      	twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
       }
-      twist_pub = twist_zero;
-      twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
-      twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
-      twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
-
       set_vel_pub.publish(twist_pub);
       ROS_INFO("secs: %f vx:%f vy:%f vz:%f", time, twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z);
       ros::spinOnce();
