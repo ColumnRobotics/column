@@ -128,30 +128,24 @@ int main(int argc, char **argv)
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
       
-	ROS_INFO("Camera_X: %f, Camera_Y: %f, Camera_Z: %f", 
-	    camera_position_in_tag_frame.position.x,
-            camera_position_in_tag_frame.position.y,
-            camera_position_in_tag_frame.position.z);
       twist_pub = twist_zero;
- 
       if(current_state.mode == "OFFBOARD"){
-/*	if(time < 0){
+	
+	if(time < 6){
 	  twist_pub = twist_zero;
-        }
-	else if(time < 1){
-	  twist_pub = twist_x; //was x
+      	  twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
+      	  twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
+      	  twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
 	}
-	//else if(time < 2){
-	//  twist_pub = twist_zero;
-	//}
-	else if(time < 3){
-	  twist_pub = twist_x;
+	else if(time < 10){
+	  twist_pub = twist_zero;
+	  twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
+      	  twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
+	  twist_pub.twist.linear.z = -1;
 	}
-*/
-        twist_pub = twist_zero;
-      	twist_pub.twist.linear.x = kp*(des_position.pose.position.x - current_position.pose.position.x);
-      	twist_pub.twist.linear.y = kp*(des_position.pose.position.y - current_position.pose.position.y);
-      	twist_pub.twist.linear.z = kp*(des_position.pose.position.z - current_position.pose.position.z);
+        else{
+	  twist_pub = twist_zero;
+        } 
       }
       set_vel_pub.publish(twist_pub);
 	
