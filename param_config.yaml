@@ -1,0 +1,6 @@
+control_gains: {p: 4.0, d: 1.0}
+land_time: 20.0
+start_time: 5.0
+inter_pose_time: 3.0
+x_rel_list: [0.3, 0.3, 0.0, 0.0]
+y_rel_list: [0.0, 0.3, 0.3, 0.0]

@@ -121,8 +121,12 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
-    float kp = 4.0;
-    float kd = 1.0;
+
+   //Load gains and flight path parameters
+    float kp, kd;
+    ros::param::get("/control_gains/p", kp);
+    ros::param::get("/control_gains/d", kd);
+
     float last_error_x = 0.0;
     float last_error_y = 0.0;
     float last_error_z = 0.0;
@@ -130,6 +134,14 @@ int main(int argc, char **argv)
     float derr_y = 0.0;
     float derr_z = 0.0;
 
+    float t_start, t_land;
+    ros::param::get("/start_time", t_start);
+    ros::param::get("/land_time",  t_land);
+
+    std::vector<double> x_rel_list;
+    std::vector<double> y_rel_list;
+    ros::param::get("/x_rel_list",  x_rel_list);
+    ros::param::get("/y_rel_list",  y_rel_list);
 
 // Set reference / desired positions to current position ONCE when offboard enabled
     geometry_msgs::PoseStamped des_position = current_position;
@@ -139,26 +151,24 @@ int main(int argc, char **argv)
     ros::Time time_begin = ros::Time::now();
     while(ros::ok()){
       float time = (ros::Time::now()-time_begin).toSec();
-      float t_start = 4.0;
-      float t_land = t_start + 24.0;
      //Set desired position sequence 
-      /*if(time > t_start){ //No changes for first 2 seconds
+      if(time > t_start){ //No changes for first 2 seconds
 	if(time < t_start+4){
-         des_position.pose.position.x = initial_position.pose.position.x + 0.3;
+         des_position.pose.position.x = initial_position.pose.position.x + x_rel_list[0];
 	}
 	else if(time < t_start+8){
-          des_position.pose.position.x = initial_position.pose.position.x + 0.3;
-          des_position.pose.position.y = initial_position.pose.position.y + 0.3;
+          des_position.pose.position.x = initial_position.pose.position.x + x_rel_list[1];
+          des_position.pose.position.y = initial_position.pose.position.y + y_rel_list[1];
 	}
 	else if(time < t_start+12){
-          des_position.pose.position.x = initial_position.pose.position.x + 0.0;
-          des_position.pose.position.y = initial_position.pose.position.y + 0.3;
+          des_position.pose.position.x = initial_position.pose.position.x + x_rel_list[2];
+          des_position.pose.position.y = initial_position.pose.position.y + y_rel_list[2];
 	}
 	else{
-          des_position.pose.position.x = initial_position.pose.position.x + 0.0;
-          des_position.pose.position.y = initial_position.pose.position.y + 0.0;
+          des_position.pose.position.x = initial_position.pose.position.x + x_rel_list[3];
+          des_position.pose.position.y = initial_position.pose.position.y + y_rel_list[3];
 	}
-       }*/
+       }
 	//P velocity controller to des_position setpoint
       twist_pub = twist_zero;
       float error_x = des_position.pose.position.x - current_position.pose.position.x;

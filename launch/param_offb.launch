@@ -1,0 +1,4 @@
+<launch>
+  <node name="offb_node" pkg="column" type="offb_node"  output="screen"/>
+  <rosparam command="load" file="$(find column)/param_config.yaml" />
+</launch>

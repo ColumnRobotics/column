@@ -22,4 +22,4 @@ rosrun april_tag april_tag_node &
 
 sleep 1
 
-rosrun column offb_node
+roslaunch column param_offb.launch
