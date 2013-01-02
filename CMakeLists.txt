@@ -69,7 +69,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   mavros_msgs#   std_msgs
+#   geometry_msgs   mavros_msgs   std_msgs
 # )
 
 ################################################
@@ -103,8 +103,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES column
-#  CATKIN_DEPENDS geometry_msgs mavros_msgs roscpp rospy std_msgs
+  LIBRARIES column
+  CATKIN_DEPENDS geometry_msgs mavros_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 

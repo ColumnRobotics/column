@@ -3,6 +3,7 @@ control_gains: {p: 4.0, d: 1.0}
 land_time: 20.0
 start_time: 5.0
 inter_pose_delay: 3.0
+offboard: 0   # Is drone currently in offboard mode or not
 # Position setpoints relative to where offboard mode is enabled
 x_rel_setpoint: 0.0
 y_rel_setpoint: 0.0

@@ -5,6 +5,7 @@
  */
 
 #include <ros/ros.h>
+#include <std_srvs/Empty.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -94,6 +95,13 @@ int main(int argc, char **argv)
     
     float avg_april_pose_x = 0.0; 
     float avg_april_pose_y = 0.0;
+
+    ros::param::set("/offboard", 1);    
+    // Empty service call to refresh updated parameter
+    ros::ServiceClient clearClient = nh.serviceClient<std_srvs::Empty>("/Clear");
+    std_srvs::Empty srv;
+    clearClient.call(srv);
+
 
     // wait for FCU connection
     while(ros::ok() && current_state.connected){
