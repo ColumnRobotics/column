@@ -151,13 +151,10 @@ int main(int argc, char **argv)
 	    ros::param::get("/z_rel_setpoint",      z_rel_setpoint);
 	    ros::param::get("/theta_rel_setpoint",  theta_rel_setpoint);
 	   
-	    bool land_now, zero_vel;
+	    int land_now, zero_vel;
 	    ros::param::get("/land_now", land_now);
 	    ros::param::get("/zero_vel", zero_vel);
-	    ros::param::get("/x_rel_setpoint",      x_rel_setpoint);
-	    ros::param::get("/y_rel_setpoint",      y_rel_setpoint);
-	    ros::param::get("/z_rel_setpoint",      z_rel_setpoint);
-	    ros::param::get("/theta_rel_setpoint",  theta_rel_setpoint);
+
 
 		//TODO: Add controller for Z angular velocity (theta)
 	    des_position.pose.position.x = initial_position.pose.position.x + x_rel_setpoint;
@@ -180,11 +177,11 @@ int main(int argc, char **argv)
 	      last_error_z = error_z;
 
 	      // Overwrite Z velocity if time to land or stop control
-	      if(land_now){
+	      if(land_now > 0){
 		twist_pub = twist_zero;
 		twist_pub.twist.linear.z = -1;
 	      }	
-	      if(zero_vel){twist_pub = twist_zero;}
+	      if(zero_vel > 0){twist_pub = twist_zero;}
 
               // Actually publish velocity commands
 	      set_vel_pub.publish(twist_pub);
