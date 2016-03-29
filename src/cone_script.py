@@ -17,7 +17,7 @@ def cone_search():
     Main function.
     '''
 
-    while rospy.get_param('/offboard') < 1:
+    while (not rospy.is_shutdown() and rospy.get_param('/offboard') < 1):
         time.sleep(0.5)
         print "Still Waiting for Offboard"
 
