@@ -29,6 +29,9 @@ geometry_msgs::Pose tag_position_in_camera_frame;
 geometry_msgs::Pose camera_position_in_tag_frame;
 double current_position_at_last_tag_frame_x;
 double current_position_at_last_tag_frame_y;
+ros::Publisher rectified_pose_pub;
+
+
 void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
     double roll, pitch, yaw;
     // Get the tag position in the camera frame
@@ -62,7 +65,11 @@ void tag_cb(const geometry_msgs::Pose::ConstPtr& pose){
     camera_position_in_tag_frame.orientation.w = 0;
     current_position_at_last_tag_frame_x = current_position.pose.position.x;
     current_position_at_last_tag_frame_y = current_position.pose.position.y;
+    rectified_pose_pub.publish(camera_position_in_tag_frame);
+
 }
+
+
 
 int main(int argc, char **argv)
 {
@@ -75,7 +82,7 @@ int main(int argc, char **argv)
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("mavros/setpoint_position/local", 10);
 
-    ros::Publisher rectified_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
+    rectified_pose_pub = nh.advertise<geometry_msgs::Pose>
             ("rectified_pose", 10);
     ros::Publisher des_pose_pub = nh.advertise<geometry_msgs::PoseStamped>
             ("des_pose", 10);
@@ -101,7 +108,7 @@ int main(int argc, char **argv)
 
     // wait for FCU connection
     while(ros::ok() && current_state.connected){
-        rectified_pose_pub.publish(camera_position_in_tag_frame);
+      //rectified_pose_pub.publish(camera_position_in_tag_frame);
 	//des_pose_pub.publish(des_position);
         ros::spinOnce();
         rate.sleep();
@@ -122,6 +129,8 @@ int main(int argc, char **argv)
 
     //send a few setpoints before starting
     while(current_state.mode != "OFFBOARD" && ros::ok()){
+      //rectified_pose_pub.publish(camera_position_in_tag_frame);
+      //ROS_INFO("NOT IN OFF BOARD MODE");
         set_vel_pub.publish(twist_zero);
         ros::spinOnce();
         rate.sleep();
@@ -200,7 +209,7 @@ int main(int argc, char **argv)
       if(time > t_land    ){twist_pub.twist.linear.z = -1;}	
 
       set_vel_pub.publish(twist_pub);
-      rectified_pose_pub.publish(camera_position_in_tag_frame);
+      //rectified_pose_pub.publish(camera_position_in_tag_frame);
       //des_pose_pub.publish(des_position);
       
 
