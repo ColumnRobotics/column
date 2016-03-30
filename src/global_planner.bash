@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 roscore &
 sleep 1
 # Record rosbags, excluding video
@@ -19,11 +17,14 @@ sleep 1
 cd ~/catkin_ws/src/april_tag
 source ./devel/setup.sh
 
-#rosrun april_tag april_tag_node &
 rosrun april_tag cole_node &
+rosrun column rectified_april_tag &
+sleep 1
 
+rosrun column world_modeling &
 rosrun topic_tools drop /april_pose 6 7 /april_pose_drop &
 sleep 1
 
+rosrun column offb_node
 #roslaunch column bt_planner.launch
-roslaunch column offb_node
+ 

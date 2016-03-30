@@ -30,7 +30,7 @@ double current_position_at_last_tag_frame_x;
 double current_position_at_last_tag_frame_y;
 void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     // Get the tag position in the camera frame
-    camera_position_in_tag_frame = *pose.pose;
+    camera_position_in_tag_frame = pose->pose;
     // Get the current position each call back
     current_position_at_last_tag_frame_x = current_position.pose.position.x;
     current_position_at_last_tag_frame_y = current_position.pose.position.y;

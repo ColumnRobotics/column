@@ -31,7 +31,8 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     camera_position_in_tag_frame_stamped = *pose;
     reading_vec.push_back(camera_position_in_tag_frame_stamped);
     // Get the pose estimate from the Body Pose Filter
-    if(reading_vec.size() == num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
+//    if(reading_vec.size() == num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
+    if(reading_vec.size() == num_filtered){
         filtered_pose_with_cov = bpf.ransac_point(reading_vec);
         if(filtered_pose_with_cov.pose.covariance[0] <= th){
             //filtered_pose.pose = filtered_pose_with_cov.pose.pose;
@@ -39,7 +40,8 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
                 pose_estimate_pub.publish(filtered_pose_with_cov);
         }
     }
-    else if(reading_vec.size() > num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
+//    else if(reading_vec.size() > num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
+    else if(reading_vec.size() > num_filtered){
         reading_vec.pop_front();
         filtered_pose_with_cov = bpf.ransac_point(reading_vec);
         if(filtered_pose_with_cov.pose.covariance[0] <= th){

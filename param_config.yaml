@@ -9,8 +9,8 @@ x_rel_setpoint: 0.0
 y_rel_setpoint: 0.0
 z_rel_setpoint: 0.0
 theta_rel_setpoint: 0.0 # NOT yet implemented
-# Boolean values that force negative Z or zero velocity
+# Values that force negative Z or zero velocity
+tag_detect: 0
 land_now: 0
 zero_vel: 0
-# Manually set to 1 to reset script sequence
-reset_script: 0
+
