@@ -34,8 +34,8 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         if rospy.get_param('/tag_detect') == 1:
             rospy.loginfo("Homing in on April Tag!!")
             # TODO: Fix this crummy logic (compare location when tag was filtered)
-            new_rel_setpoint_x = rospy.get_param('/x_rel_setpoint') - rospy.get_param('/filtered_tag_x')
-            new_rel_setpoint_y = rospy.get_param('/y_rel_setpoint') - rospy.get_param('/filtered_tag_y')
+            new_rel_setpoint_x = rospy.get_param('/x_rel_setpoint') + rospy.get_param('/filtered_tag_x')
+            new_rel_setpoint_y = rospy.get_param('/y_rel_setpoint') + rospy.get_param('/filtered_tag_y')
             rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
             rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
             # Give 2 seconds to stabilize
@@ -72,16 +72,16 @@ def cone_search():
             break
 
     # Forward expanding cone search path (forward 2.4m, out +/- 0.9m)
-    # NOTE that obnoxiously, +x is to the drone's LEFT, +y is to the drone's REAR
+    # X Y Z here is RIGHT FORWARDS UP    (mavros frame X, Y is negative)
     xy_setpoints = [( 0.0,  0.0),
-                    ( 0.3, -0.5),
-                    (-0.3, -0.5),
-                    (-0.6, -1.0),
-                    ( 0.6, -1.0),
-                    ( 0.9, -1.5),
-                    ( -0.9,-1.5),
-                    ( -0.9,-2.0),
-                    ( 0.9, -2.0)]
+                    ( 0.3,  0.5),
+                    (-0.3,  0.5),
+                    (-0.6,  1.0),
+                    ( 0.6,  1.0),
+                    ( 0.9,  1.5),
+                    ( -0.9, 1.5),
+                    ( -0.9, 2.0),
+                    ( 0.9,  2.0)]
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):

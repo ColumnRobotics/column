@@ -31,7 +31,8 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     //R.getRPY(roll,pitch,yaw);
     //ROS_INFO("Roll: %f, Pitch: %f, Yaw: %f",
     //	roll*180/3.1415926, pitch*180/3.1415926, yaw*180/3.1415926);
-
+    
+    //Now X Y Z is RIGHT FORWARDS UP for /rectified_pose
     //FIX X coordinate to be right = positive with NEGATIVE
     camera_position_in_tag_frame.pose.position.x = -(R[0][0]*tag_position_in_camera_frame.pose.position.x +
         R[0][1]*tag_position_in_camera_frame.pose.position.y +

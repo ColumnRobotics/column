@@ -16,8 +16,12 @@ def april_cb(msg):
     rospy.loginfo("Tag Detected")
     rospy.set_param('/tag_detect', 1)
     # Saving all values in X right, Y forwards frame
-    rospy.set_param('/filtered_tag_x', -1.0 * msg.pose.pose.position.x)
+    rospy.set_param('/filtered_tag_x', msg.pose.pose.position.x)
     rospy.set_param('/filtered_tag_y', msg.pose.pose.position.y)
+    rospy.set_param('/filtered_tag_y', msg.pose.pose.position.y)
+    rospy.set_param('/pose_last_tagupdate_x', 0.0)  # TODO: Actually update and use this
+    rospy.set_param('/pose_last_tagupdate_y', 0.0)
+    rospy.set_param('/pose_last_tagupdate_z', 0.0)
 
 def listener():
     rospy.init_node('tag_listener', anonymous=True)

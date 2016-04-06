@@ -5,12 +5,14 @@ start_time: 5.0
 inter_pose_delay: 3.0
 offboard: 0   # Is drone currently in offboard mode or not
 # Position setpoints relative to where offboard mode is enabled
+# X Y Z is RIGHT FORWARDS UP
 x_rel_setpoint: 0.0
 y_rel_setpoint: 0.0
 z_rel_setpoint: 0.0
 theta_rel_setpoint: 0.0 # NOT yet implemented
 # Flags for april tag detection and pose
 tag_detect: 0
+# X Y Z is RIGHT FORWARDS UP
 filtered_tag_x: 0.0
 filtered_tag_y: 0.0
 # Values that force negative Z or zero velocity
