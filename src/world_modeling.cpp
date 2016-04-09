@@ -25,7 +25,8 @@ geometry_msgs::PoseWithCovarianceStamped filtered_pose_with_cov;
 geometry_msgs::PoseStamped filtered_pose;
 
 
-void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
+void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
+{
     int num_filtered;// = 10;
     ros::param::get("/pose_filter_min_points", num_filtered);
     double th;// = 0.3;
@@ -34,25 +35,15 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     camera_position_in_tag_frame_stamped = *pose;
     reading_vec.push_back(camera_position_in_tag_frame_stamped);
     // Get the pose estimate from the Body Pose Filter
-//    if(reading_vec.size() == num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
-    if(reading_vec.size() == num_filtered){
+    if(reading_vec.size() >= num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2)    
+    {
+        if(reading_vec.size() > num_filtered)
+          reading_vec.pop_front();
         filtered_pose_with_cov = bpf.ransac_point(reading_vec);
-        if(filtered_pose_with_cov.pose.covariance[0] <= th){
-            //filtered_pose.pose = filtered_pose_with_cov.pose.pose;
+        if(filtered_pose_with_cov.pose.covariance[0] <= th)
             if(filtered_pose_with_cov.pose.pose.position.x != 0.0 && filtered_pose_with_cov.pose.pose.position.y != 0.0 && filtered_pose_with_cov.pose.pose.position.z != 0)
                 pose_estimate_pub.publish(filtered_pose_with_cov);
-        }
-    }
-//    else if(reading_vec.size() > num_filtered && fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2){
-    else if(reading_vec.size() > num_filtered){
-        reading_vec.pop_front();
-        filtered_pose_with_cov = bpf.ransac_point(reading_vec);
-        if(filtered_pose_with_cov.pose.covariance[0] <= th){
-            //filtered_pose.pose = filtered_pose_with_cov.pose.pose;
-            if(filtered_pose_with_cov.pose.pose.position.x != 0.0 && filtered_pose_with_cov.pose.pose.position.y != 0.0 && filtered_pose_with_cov.pose.pose.position.z != 0)
-                pose_estimate_pub.publish(filtered_pose_with_cov);
-        }
-    }
+    }   
 }
 
 int main(int argc, char **argv)

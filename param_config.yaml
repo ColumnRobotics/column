@@ -1,4 +1,4 @@
-control_gains: {p: 4.0, d: 1.0}
+control_gains: {p: 4.0, d: 1.0, p_yaw: 4.0, d_yaw: 1.0}
 # Controls for search pattern sequence
 land_time: 20.0
 start_time: 5.0
@@ -9,7 +9,7 @@ offboard: 0   # Is drone currently in offboard mode or not
 x_rel_setpoint: 0.0
 y_rel_setpoint: 0.0
 z_rel_setpoint: 0.0
-theta_rel_setpoint: 0.0 # NOT yet implemented
+yaw_rel_setpoint: 0.0 # NOT yet implemented
 # Flags for april tag detection and pose
 tag_detect: 0
 # X Y Z is RIGHT FORWARDS UP
@@ -22,5 +22,3 @@ zero_vel: 0
 ransac_inlier_threshold: 0.1
 pose_filter_min_points: 10 # Originally 10
 pose_filter_covariance_threshold: 0.4  # Orig. 0.3: Must be less than or equal
-
-
