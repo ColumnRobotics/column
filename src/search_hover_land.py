@@ -104,6 +104,22 @@ def cone_search():
         time.sleep(2)
     land_now()    
 
+def attempt_land():
+    while 1:
+        if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
+            rospy.loginfo("Homing in on April Tag!!")
+            new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x')
+            new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') + rospy.get_param('/filtered_tag_y')
+            new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw') + rospy.get_param('/filtered_tag_yaw')
+        else: # Hold position until you get a good reading
+            rospy.loginfo("Wait for readings!!")
+            new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x')
+            new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y')
+            new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw')
+        rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
+        rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
+        rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
+
 # Main function.
 if __name__ == '__main__':
     # Initialize the node and name it.
@@ -111,5 +127,13 @@ if __name__ == '__main__':
     # Go to the main loop.
     # /S# with correct custom mode we can wait until it changes
     # state_sub = rospy.Subscriber(mavros.get_topic('state'), State, state_cb)
-    rospy.set_param('/yaw_rel_setpoint', 0)
-    cone_search()
+    while not rospy.is_shutdown(): 
+        time.sleep(0.5)
+        if rospy.get_param('/offboard') < 1:
+            rospy.loginfo("Still Waiting for Offboard")
+        else:
+            break
+    attempt_land()    
+#    rospy.set_param('/yaw_rel_setpoint', 0)
+#    cone_search()
+
