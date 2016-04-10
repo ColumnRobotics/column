@@ -29,7 +29,8 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
         # Apply setpoint parameters at 10 Hz
         
         # Home in on tag then land instead, if tag detected
-        if rospy.get_param('/tag_detect') == 1:
+        '''
+        if rospy.get_param('/filtered_detect') == 1:
             rospy.loginfo("Homing in on April Tag!!")
             while 1:
                 new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x')
@@ -43,6 +44,22 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
                # rospy.set_param('/y_rel_setpoint', rospy.get_param('/filtered_tag_y'))
                # time.sleep(2) 
                # land_now()
+        '''
+        if rospy.get_param('/tag_detect') == 1:
+            while 1:
+                if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
+                    rospy.loginfo("Homing in on April Tag!!")
+                    new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') + rospy.get_param('/filtered_tag_x')
+                    new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y') + rospy.get_param('/filtered_tag_y')
+                    new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw') + rospy.get_param('/filtered_tag_yaw')
+                else: # Hold position until you get a good reading
+                    rospy.loginfo("Wait for readings!!")
+                    new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x')
+                    new_rel_setpoint_y = rospy.get_param('/pose_last_tagupdate_y')
+                    new_rel_setpoint_yaw = rospy.get_param('/pose_last_tagupdate_yaw')
+                rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
+                rospy.set_param('/y_rel_setpoint', new_rel_setpoint_y)
+                rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
         else:
             rospy.set_param('/x_rel_setpoint', float(x_array[i])) 
             rospy.set_param('/y_rel_setpoint', float(y_array[i]))

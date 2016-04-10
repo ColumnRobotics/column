@@ -12,9 +12,11 @@ z_rel_setpoint: 0.0
 yaw_rel_setpoint: 0.0 # NOT yet implemented
 # Flags for april tag detection and pose
 tag_detect: 0
+filtered_detect: 0
 # X Y Z is RIGHT FORWARDS UP
 filtered_tag_x: 0.0
 filtered_tag_y: 0.0
+filtered_tag_yaw: 0.0
 # Values that force negative Z or zero velocity
 land_now: 0
 zero_vel: 0
