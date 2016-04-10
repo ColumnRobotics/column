@@ -52,7 +52,7 @@ def tag_detect_cb(msg):
 def listener():
     rospy.init_node('tag_listener', anonymous=True)
     rospy.Subscriber('filtered_pose', PoseWithCovarianceStamped, april_cb)
-    rospy.Subscriber('mavros/local_position/local', Pose, pose_cb)
+    rospy.Subscriber('mavros/local_position/local', PoseStamped, pose_cb)
     rospy.Subscriber('rectified_pose', PoseStamped, tag_detect_cb)
     rospy.spin()
 
