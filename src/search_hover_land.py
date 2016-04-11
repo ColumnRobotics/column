@@ -106,7 +106,7 @@ def cone_search():
 
 def attempt_land():
     while 1:
-        time = rospy.get_param('/pose_last_tagupdate_time')
+        update_time = rospy.get_param('/pose_last_tagupdate_time')
         if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
             rospy.loginfo("Homing in on April Tag!!")
             new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') - rospy.get_param('/filtered_tag_x') - rospy.get_param('/x_init')

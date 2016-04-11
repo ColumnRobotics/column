@@ -1,6 +1,6 @@
 #include <column/BodyPoseFilter.h>
 #include <time.h>
-
+#include <tf/transform_datatypes.h>
 
 geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_line(const std::deque<geometry_msgs::PoseStamped> &  reading_vec){
     // Parameters
@@ -106,6 +106,13 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_line(const std::
     return filtered_estimate;
 }
 
+void getRPY(const geometry_msgs::Pose & pose, double rpy[3])
+{
+        tf::Quaternion q = tf::Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
+        tf::Matrix3x3 R = tf::Matrix3x3(q); // Get the rotation matrix
+        R.getRPY(rpy[0],rpy[1],rpy[2]);
+}
+
 geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std::deque<geometry_msgs::PoseStamped> &  reading_vec){
     // Parameters
     int vec_size = reading_vec.size(); // Number of readings
@@ -114,8 +121,9 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
     ros::param::get("/ransac_inlier_threshold", th);
 
     int best_inliers = 0; // Max inliers
-    double best_avg[3] = {0, 0, 0}; // Average values
-    double sum[3] = {0, 0, 0}; // Average values
+    double best_avg[4] = {0, 0, 0, 0}; // Average values
+    double sum[4] = {0, 0, 0, 0}; // Average values
+    double rpy[3] = {0, 0, 0}; // Roll, pitch, yaw values
     ros::Time time_sum;
     time_sum.sec = 0;
     time_sum.nsec = 0;
@@ -131,6 +139,7 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
         sum[0] = 0;
         sum[1] = 0;
         sum[2] = 0;
+        sum[3] = 0;
         // Get the pose
         pose = reading_vec[pose_index];
 
@@ -151,6 +160,8 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
                     sum[0] += curr_pose.pose.position.x;
                     sum[1] += curr_pose.pose.position.y;
                     sum[2] += curr_pose.pose.position.z;
+                    sum[3] += curr_pose.pose.orientation.z;
+
                     inliers += 1;
                     time_sum.sec = time_sum.sec + curr_pose.header.stamp.sec;
                     time_sum.nsec = time_sum.nsec + curr_pose.header.stamp.nsec;
@@ -162,6 +173,7 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
             best_avg[0] = sum[0] / best_inliers;
             best_avg[1] = sum[1] / best_inliers;
             best_avg[2] = sum[2] / best_inliers;
+            best_avg[3] = sum[3] / best_inliers;
             best_average_time.sec = time_sum.sec / best_inliers;
             best_average_time.nsec = time_sum.nsec / best_inliers;
         }
@@ -172,11 +184,12 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
     filtered_estimate.pose.pose.position.x = best_avg[0];
     filtered_estimate.pose.pose.position.y = best_avg[1];
     filtered_estimate.pose.pose.position.z = best_avg[2];
-    filtered_estimate.pose.pose.orientation.x = 0; 
-    filtered_estimate.pose.pose.orientation.y = 0; 
-    filtered_estimate.pose.pose.orientation.z = 0; 
-    filtered_estimate.pose.pose.orientation.w = 0; 
+    filtered_estimate.pose.pose.orientation.x = 0.0; 
+    filtered_estimate.pose.pose.orientation.y = 0.0; 
+    filtered_estimate.pose.pose.orientation.z = best_avg[3]; // yaw 
+    filtered_estimate.pose.pose.orientation.w = 0.0; 
     filtered_estimate.header.stamp = best_average_time;
+
     double variance = ((double)vec_size - (double)best_inliers) / (double)vec_size;
     for(int i = 0; i < 36; i++){
         if(i % 7 == 0){
@@ -186,7 +199,7 @@ geometry_msgs::PoseWithCovarianceStamped BodyPoseFilter::ransac_point(const std:
             filtered_estimate.pose.covariance[i] = 0;
         }
     }
-    ROS_INFO("best_iniliers: %d variance: %f covariance[0]: %f \n", best_inliers, variance, filtered_estimate.pose.covariance[0]);
+    //ROS_INFO("best_iniliers: %d variance: %f covariance[0]: %f \n", best_inliers, variance, filtered_estimate.pose.covariance[0]);
     return filtered_estimate;
 }
 

@@ -34,17 +34,18 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose)
     // Get the pose from the rectified_pose topic
     camera_position_in_tag_frame_stamped = *pose;
     reading_vec.push_back(camera_position_in_tag_frame_stamped);
+    if(reading_vec.size() > num_filtered)
+        reading_vec.pop_front();
     // Get the pose estimate from the Body Pose Filter
-    //ROS_INFO("Time Difference: %f", fabs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec));
+    //ROS_INFO("Time Difference: %d", abs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec));
     //ROS_INFO("First time: %d", reading_vec[0].header.stamp.sec);
     //ROS_INFO("Last time: %d", reading_vec[reading_vec.size()-1].header.stamp.sec);
-    if(reading_vec.size() >= num_filtered && abs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<2)    
+    if(reading_vec.size() >= num_filtered && abs(reading_vec[0].header.stamp.sec-reading_vec[reading_vec.size()-1].header.stamp.sec)<=2)    
     {
-        if(reading_vec.size() > num_filtered)
-          reading_vec.pop_front();
         filtered_pose_with_cov = bpf.ransac_point(reading_vec);
         if(filtered_pose_with_cov.pose.covariance[0] <= th)
             if(filtered_pose_with_cov.pose.pose.position.x != 0.0 && filtered_pose_with_cov.pose.pose.position.y != 0.0 && filtered_pose_with_cov.pose.pose.position.z != 0)
+                //ROS_INFO("Yaw after World Model: %f", filtered_pose_with_cov.pose.pose.orientation.z); 
                 pose_estimate_pub.publish(filtered_pose_with_cov);
     }   
 }

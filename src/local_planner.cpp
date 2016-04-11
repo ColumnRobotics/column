@@ -43,10 +43,10 @@ void tag_cb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& pose)
 float getYaw(geometry_msgs::Pose pose)
 {
     tf::Quaternion q = tf::Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
-    double rpy[3];
+    double ypr[3];
     tf::Matrix3x3 R = tf::Matrix3x3(q); // Get the rotation matrix
-    R.getRPY(rpy[0],rpy[1],rpy[2]);
-    return (float)rpy[2];
+    R.getEulerYPR(ypr[0], ypr[1], ypr[2]);
+    return (float)ypr[0];
 }
 
 int main(int argc, char **argv)

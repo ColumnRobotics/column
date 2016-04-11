@@ -22,20 +22,18 @@ def get_yaw(pose):
     pose.orientation.y,
     pose.orientation.z,
     pose.orientation.w)
-    euler = tf.transformations.euler_from_quaternion(quaternion)
-#    roll = euler[0]
-#    pitch = euler[1]
-    yaw = euler[2]
+    euler = tf.transformations.euler_from_quaternion(quaternion, axes='szyx')
+    yaw = euler[0]
     return yaw
     
 def april_cb(msg):
-    rospy.loginfo("Got reading")
+    #rospy.loginfo("Got reading")
     rospy.set_param('/filtered_detect', 1)
     # Saving all values in X right, Y forwards frame
     rospy.set_param('/filtered_tag_x', msg.pose.pose.position.x)
     rospy.set_param('/filtered_tag_y', msg.pose.pose.position.y)
     rospy.set_param('/filtered_tag_z', msg.pose.pose.position.z)
-    rospy.set_param('/filtered_tag_yaw', get_yaw(msg.pose.pose))
+    rospy.set_param('/filtered_tag_yaw', msg.pose.pose.orientation.z) # yaw
     rospy.set_param('/pose_last_tagupdate_x', -current_pose.pose.position.x)
     rospy.set_param('/pose_last_tagupdate_y', -current_pose.pose.position.y)
     rospy.set_param('/pose_last_tagupdate_z', current_pose.pose.position.z)
@@ -48,7 +46,7 @@ def pose_cb(msg):
     current_pose = msg
 
 def tag_detect_cb(msg):
-    rospy.loginfo("Tag Detected")
+    #rospy.loginfo("Tag Detected")
     rospy.set_param('/tag_detect', 1)
 #    rospy.set_param('/pose_last_tagupdate_x', -current_pose.pose.position.x)
 #    rospy.set_param('/pose_last_tagupdate_y', -current_pose.pose.position.y)
