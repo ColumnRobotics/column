@@ -71,8 +71,8 @@ def land_now():
     rospy.loginfo("Landing Now")
     rospy.set_param('/land_now', 1)
     time.sleep(2.5)
-    rospy.loginfo("Setting zero velocity target")
-    rospy.set_param('/zero_vel', 1)
+    #rospy.loginfo("Setting zero velocity target")
+    #rospy.set_param('/zero_vel', 1)
     rospy.spin() # Do nothing until node closes
 
 def cone_search():
@@ -82,6 +82,7 @@ def cone_search():
 
     # Forward expanding cone search path (forward 2.4m, out +/- 0.9m)
     # X Y Z here is RIGHT FORWARDS UP    (mavros frame X, Y is negative)
+    '''
     xy_setpoints = [( 0.0,  0.0),
                     ( 0.3,  0.5),
                     (-0.3,  0.5),
@@ -91,6 +92,17 @@ def cone_search():
                     ( -0.9, 1.5),
                     ( -0.9, 2.0),
                     ( 0.9,  2.0)]
+    '''
+    dy = 1
+    xy_setpoints = [( 0.0,  0.0 * dy),
+                    ( 0.3,  1.0 * dy),
+                    (-0.3,  1.0 * dy),
+                    (-0.6,  2.0 * dy),
+                    ( 0.6,  2.0 * dy),
+                    ( 0.9,  3.0 * dy),
+                    ( -0.9, 3.0 * dy),
+                    ( -0.9, 4.0 * dy),
+                    ( 0.9,  4.0 * dy)]
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):
@@ -102,7 +114,7 @@ def cone_search():
         time.sleep(2)
 
 def attempt_land():
-    update_time = rospy.get_param('/pose_last_tagupdate_time')
+    #update_time = rospy.get_param('/pose_last_tagupdate_time')
     if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
         rospy.loginfo("Homing in on April Tag!!")
         new_rel_setpoint_x = rospy.get_param('/pose_last_tagupdate_x') - rospy.get_param('/filtered_tag_x') - rospy.get_param('/x_init')
@@ -124,15 +136,14 @@ if __name__ == '__main__':
             rospy.loginfo("Still Waiting for Offboard")
         else:
             break
+    rospy.set_param('/filtered_detect', 0)
+    rospy.set_param('/tag_detect', 0)
     rospy.loginfo("Begin Cone Search")
     cone_search()
     rospy.loginfo("Wait in place")
-    rospy.set_param('/x_rel_setpoint', 0)
-    rospy.set_param('/y_rel_setpoint', 0)
-    rospy.set_param('/yaw_rel_setpoint', 0)
-    time.sleep(2)
-    rospy.loginfo("Move to pre-dock")
-    attempt_land()
-    time.sleep(2)
+    time.sleep(3)
+    #rospy.loginfo("Move to pre-dock")
+    #attempt_land()
+    #time.sleep(2)
     rospy.loginfo("Land")
     land_now()
