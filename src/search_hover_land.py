@@ -63,6 +63,7 @@ def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):
            
         else:
         '''
+        #### ADD A BREAK ###
         rospy.set_param('/x_rel_setpoint', float(x_array[i])) 
         rospy.set_param('/y_rel_setpoint', float(y_array[i]))
         time.sleep(0.1)
@@ -106,7 +107,7 @@ def cone_search():
 
     # Visit each setpoint
     for i in range(len(xy_setpoints)-1):
-        if rospy.get_param('/tag_detect') == 1:
+        if rospy.get_param('/tag_detect') == 1:  #### Use /filtered_detect instead
             return
         rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
                                                       xy_setpoints[i+1][1]) 
@@ -141,9 +142,9 @@ if __name__ == '__main__':
     rospy.loginfo("Begin Cone Search")
     cone_search()
     rospy.loginfo("Wait in place")
-    time.sleep(3)
-    #rospy.loginfo("Move to pre-dock")
-    #attempt_land()
-    #time.sleep(2)
+    time.sleep(2)
+    rospy.loginfo("Move to pre-dock")
+    attempt_land() # move to predock
+    time.sleep(2.5)
     rospy.loginfo("Land")
     land_now()
