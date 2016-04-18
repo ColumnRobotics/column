@@ -77,7 +77,7 @@ def cone_search():
             return
         rospy.loginfo("Setting new waypoint: %f, %f", xy_setpoints[i+1][0],
                                                       xy_setpoints[i+1][1]) 
-        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.15)
+        command_path_xy(xy_setpoints[i], xy_setpoints[i+1], speed_mps=0.1)
         #LAST-MINUTE CHANGE HERE: Allow break out before 2 second sleep
         if rospy.get_param('/filtered_detect') == 1:  #### Use /filtered_detect instead
             return
