@@ -140,12 +140,15 @@ add_library(column
 add_executable(local_planner src/local_planner.cpp)
 add_executable(rectified_april_tag src/rectified_april_tag.cpp)
 add_executable(world_modeling src/world_modeling.cpp)
+find_package(catkin REQUIRED COMPONENTS tf)
+add_executable(pose_tf src/pose_tf.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(column_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(rectified_april_tag ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(world_modeling column ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(pose_tf ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(column_node
@@ -163,6 +166,9 @@ target_link_libraries(rectified_april_tag
 target_link_libraries(world_modeling
 	${catkin_LIBRARIES}
 	column
+)
+target_link_libraries(pose_tf
+	${catkin_LIBRARIES}
 )
 
 #############
