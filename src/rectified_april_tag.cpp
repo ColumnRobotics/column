@@ -50,7 +50,6 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     camera_position_in_tag_frame.pose.orientation.w = 0;
     camera_position_in_tag_frame.header.stamp = tag_position_in_camera_frame.header.stamp;
     
-    
     rectified_pose_pub.publish(camera_position_in_tag_frame);
 }
 
@@ -65,9 +64,10 @@ int main(int argc, char **argv)
   
   ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::PoseStamped>("april_pose", 10, tag_cb);   //changed to april_pose_drop,updates every 1Hz
   
-  while (ros::ok()){
-    ros::spinOnce();
-  }
+  ros::spin();
+//  while (ros::ok()){
+//    ros::spinOnce();
+//  }
 
   return 0;
 }

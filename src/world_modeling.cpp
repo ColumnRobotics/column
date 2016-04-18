@@ -68,9 +68,10 @@ int main(int argc, char **argv)
   
   //ros::Subscriber tag_sub = nh.subscribe<geometry_msgs::Pose>("april_pose", 10, tag_cb);   //changed to april_pose_drop,updates every 1Hz
   
-  while (ros::ok()){
-    ros::spinOnce();
-  }
+  ros::spin();
+//  while (ros::ok()){
+//    ros::spinOnce();
+//  }
 
   return 0;
 }
