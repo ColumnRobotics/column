@@ -110,6 +110,7 @@ if __name__ == '__main__':
     rospy.set_param('/tag_detect', 0)
     rospy.loginfo("Begin Cone Search")
     cone_search()
+    time.sleep(2) # Pause
     rospy.loginfo("Move to pre-dock")
     attempt_land() # move to predock
     time.sleep(2)
