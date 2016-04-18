@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     ros::NodeHandle priv_nh("~");
     ros::Subscriber local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>
             ("mavros/local_position/local", 10, position_cb);
-    odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 50);
+    odom_pub = nh.advertise<nav_msgs::Odometry>("odom22", 50);
 
     std::cout << "Subscribed to mavros/local_position/local" << std::endl;
 
