@@ -115,6 +115,7 @@ if __name__ == '__main__':
     center_on_dock() 
     time.sleep(2)
     center_on_dock() 
+    time.sleep(2)
     rospy.loginfo("Land")
     rospy.set_param('/land_now', 1)
     while not rospy.is_shutdown():
