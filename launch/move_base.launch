@@ -3,7 +3,18 @@
 
   <!--- Run AMCL -->
   <!--- <include file="$(find amcl)/examples/amcl_omni.launch" />-->
+  
+  <!-- Transform publisher from map to base_link -->
+  <node name="pose_tf" type="pose_tf" pkg="column" output="screen"/>
+  
+  <!-- Static transform publisher from map to local_origin -->
+  <node pkg="tf" type="static_transform_publisher" name="map_origin" args="0 0 0 0 0 0 /map /local_origin 100"/>
 
+  <!-- Static transform publisher from fcu to camera_link -->
+  <!-- RPY = XYZ -->
+  <node pkg="tf" type="static_transform_publisher" name="camera_to_base" args="0 0 0 0 0 0 /base_footprint /camera_link 100"/>
+  
+  <!-- Move Base Package -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <rosparam file="$(find column)/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find column)/costmap_common_params.yaml" command="load" ns="local_costmap" />

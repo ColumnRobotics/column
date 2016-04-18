@@ -30,9 +30,9 @@ int main(int argc, char **argv)
 
   ros::Rate loop_rate(10);
 
-  odom_sub = nh.subscribe<nav_msgs/Odometry>("odom", 10, position_cb); // Publisher of rectified pose
+  odom_sub = nh.subscribe<nav_msgs::Odometry>("odom", 10, position_cb); // Publisher of rectified pose
 
-  pose_estimate_pub = nh.advertise<geometry_msgs/PoseStamped>("mavros/vision_pose/pose", 10); // Publisher of rectified pose
+  pose_estimate_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/vision_pose/pose", 10); // Publisher of rectified pose
   
   ros::spin();
 
