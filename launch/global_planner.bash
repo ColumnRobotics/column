@@ -4,18 +4,18 @@ sleep 1
 # Record rosbags, excluding video
 rosbag record -a -x "/camera/image(.*)|/april_tag_debug/(.*)" &
 
-cd ~/Development/ROS-semi-official
+cd ~/catkin_ws/
 source devel/setup.bash
-source ./gscam_config.sh
+source ./src/gscam_config.sh
+
+cd ~/column_ws/
+source devel/setup.bash
 
 rosrun gscam gscam &
 sleep 1
 
 roslaunch mavros px4.launch &
 sleep 1
-
-cd ~/catkin_ws/src/april_tag
-source ./devel/setup.sh
 
 roslaunch column search_hover_land.launch
  
