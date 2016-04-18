@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 		publish_idx++;
 		if(publish_idx % publish_skip == 0){ 
 			ROS_INFO("Time (s): %f", time);
-			ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f wz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z, twist_pub.twist.angular.z);
+			//ROS_INFO("Cmd vel:   vx:%f vy:%f vz:%f wz:%f", twist_pub.twist.linear.x, twist_pub.twist.linear.y, twist_pub.twist.linear.z, twist_pub.twist.angular.z);
 			ROS_INFO("Current Pos:  x:%f  y:%f  z:%f yaw:%f", current_position.pose.position.x, current_position.pose.position.y, current_position.pose.position.z, curr_yaw);
 			ROS_INFO("Desired Pos:  x:%f  y:%f  z:%f yaw:%f", des_position.pose.position.x, des_position.pose.position.y, des_position.pose.position.z, des_yaw);
 		}
