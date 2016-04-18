@@ -83,7 +83,7 @@ def cone_search():
             return
         time.sleep(2)
 
-def attempt_land():
+def center_on_dock():
     #update_time = rospy.get_param('/pose_last_tagupdate_time')
     if rospy.get_param('/filtered_detect') == 1: # Move to April Tag
         rospy.loginfo("Homing in on April Tag!!")
@@ -112,10 +112,12 @@ if __name__ == '__main__':
     cone_search()
     time.sleep(2) # Pause
     rospy.loginfo("Move to pre-dock")
-    attempt_land() # move to predock
+    center_on_dock() 
     time.sleep(2)
-    rospy.loginfo("re-center over dock")
-    attempt_land() # move to predock
-    time.sleep(2)
+    center_on_dock() 
     rospy.loginfo("Land")
-    land_now()
+    rospy.set_param('/land_now', 1)
+    while not rospy.is_shutdown():
+        time.sleep(0.3)
+        center_on_dock() # move to predock
+
