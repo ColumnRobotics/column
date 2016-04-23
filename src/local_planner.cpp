@@ -5,6 +5,7 @@
  */
 
 #include <ros/ros.h>
+#include <algorithm>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -153,6 +154,9 @@ int main(int argc, char **argv)
         ros::param::getCached("/control_gains/p_yaw", kp_yaw);
         ros::param::getCached("/control_gains/d_yaw", kd_yaw);
 
+        float max_xy_vel;
+        ros::param::getCached("/max_xy_vel", max_xy_vel)
+
 	    float x_rel_setpoint, y_rel_setpoint, z_rel_setpoint, yaw_rel_setpoint;
 	    ros::param::getCached("/x_rel_setpoint",      x_rel_setpoint);
 	    ros::param::getCached("/y_rel_setpoint",      y_rel_setpoint);
@@ -185,8 +189,9 @@ int main(int argc, char **argv)
 	      derr_z = ((4.0*derr_z + (error_z - last_error_z)*rate_hz) / 5.0);
           derr_yaw = ((4.0*derr_yaw + (error_yaw - last_error_yaw)*rate_hz) / 5.0);
 
-	      twist_pub.twist.linear.x = kp * error_x  +  kd * derr_x;
-	      twist_pub.twist.linear.y = kp * error_y  +  kd * derr_y;
+          //Clamp x and y to +/- max_xy_vel
+	      twist_pub.twist.linear.x = std::max(std::min(kp * error_x  +  kd * derr_x, max_xy_vel), -max_xy_vel);
+	      twist_pub.twist.linear.y = std::max(std::min(kp * error_y  +  kd * derr_y, max_xy_vel), -max_xy_vel);
 	      twist_pub.twist.linear.z = kp * error_z  +  kd * derr_z;
           twist_pub.twist.angular.z = kp_yaw * error_yaw + kd_yaw * derr_yaw;
 	      last_error_x = error_x;
@@ -198,7 +203,9 @@ int main(int argc, char **argv)
 	      if(land_now > 0){
               //twist_pub.twist.linear.x = 0.0;
               //twist_pub.twist.linear.y = 0.0;
-              twist_pub.twist.linear.z = -0.2;
+              float land_z_vel;
+              ros::param::getCached('/land_z_vel', land_z_vel);
+              twist_pub.twist.linear.z = -land_z_vel
 	      }	
 	      if(zero_vel > 0){twist_pub = twist_zero;}
 
