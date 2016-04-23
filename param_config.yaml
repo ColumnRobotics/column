@@ -1,4 +1,5 @@
 control_gains: {p: 4.0, d: 1.0, p_yaw: 0.0, d_yaw: 0.0}
+max_xy_vel: 0.5
 # Controls for search pattern sequence
 land_time: 20.0
 start_time: 5.0
@@ -28,7 +29,8 @@ pose_last_tagupdate_time: 0.0
 # Values that force negative Z or zero velocity
 land_now: 0
 zero_vel: 0
+land_z_vel: 0.2
 # April-tag Filtering related
 ransac_inlier_threshold: 0.1
 pose_filter_min_points: 5 # Originally 10
-pose_filter_covariance_threshold: 0.3  # Orig. 0.3: Must be less than or equal
+pose_filter_covariance_threshold: 0.3   # Orig. 0.3, Must be less than or equal
