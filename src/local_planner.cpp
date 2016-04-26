@@ -173,6 +173,12 @@ int main(int argc, char **argv)
 	    des_position.pose.position.x = initial_position.pose.position.x + x_rel_setpoint;
 	    des_position.pose.position.y = initial_position.pose.position.y + y_rel_setpoint;
 	    des_position.pose.position.z = initial_position.pose.position.z + z_rel_setpoint;
+
+        // TODO: Remove NEXT 3 LINES ONLY FOR TESTING
+	    des_position.pose.position.x = 0;
+	    des_position.pose.position.y = 0;
+	    des_position.pose.position.z = 1;
+ 
         des_yaw = normalize_angle(normalize_angle(initial_yaw) + normalize_angle(yaw_rel_setpoint));
         curr_yaw = getYaw(current_position.pose);
 

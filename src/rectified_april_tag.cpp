@@ -30,12 +30,13 @@ void tag_cb(const geometry_msgs::PoseStamped::ConstPtr& pose){
     //tf::Quaternion Q = tf::Quaternion(yaw, pitch, roll); 
     
     //Now X Y Z is RIGHT FORWARDS UP for /rectified_pose
-    //FIX X coordinate to be right = positive with NEGATIVE
-    camera_position_in_tag_frame.pose.position.x = -(R[0][0]*tag_position_in_camera_frame.pose.position.x +
+    //FIX X coordinate to be right = positive with NEGATIVE 
+    // CHANGED ABOVE TO BE ALIGNED TO LOCAL/POSITION/LOCAL
+    camera_position_in_tag_frame.pose.position.x = (R[0][0]*tag_position_in_camera_frame.pose.position.x +
         R[0][1]*tag_position_in_camera_frame.pose.position.y +
         R[0][2]*tag_position_in_camera_frame.pose.position.z) * 0.0254;
 
-    camera_position_in_tag_frame.pose.position.y = (R[1][0]*tag_position_in_camera_frame.pose.position.x + 
+    camera_position_in_tag_frame.pose.position.y = -(R[1][0]*tag_position_in_camera_frame.pose.position.x + 
         R[1][1]*tag_position_in_camera_frame.pose.position.y +
         R[1][2]*tag_position_in_camera_frame.pose.position.z) * 0.0254;
     camera_position_in_tag_frame.pose.position.z = (R[2][0]*tag_position_in_camera_frame.pose.position.x +
