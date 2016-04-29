@@ -95,7 +95,7 @@ def lawnmower_search(dx=0.5, dy=0.6,cone_scale=None, speed_mps=0.1, waypoint_del
     # Abort if april tag already detected
     if rospy.get_param('/filtered_detect') == 1: return
 
-    wp_gen = waypoint_gen(dx=dx, dy=dy,cone_scale=cone_scale, max_iter=8)
+    wp_gen = waypoint_gen(dx=dx, dy=dy,cone_scale=cone_scale, max_iter=10)
 
     # Visit each setpoint
     last_setpoint = (0.0, 0.0)
@@ -130,8 +130,8 @@ def center_on_dock(interpolate=False, last_center=None):
             command_path(current_setpoint, (new_rel_setpoint_x, new_rel_setpoint_y),
                          speed_mps=0.2, tag_seen=True)
         elif last_center is not None:  # Leaky integrator over three setpoints
-            rospy.set_param('/x_rel_setpoint', (new_rel_setpoint_x + last_center[0] * 7) / 8) #Originaly 2/3, better 4/5
-            rospy.set_param('/y_rel_setpoint', (new_rel_setpoint_y + last_center[1] * 7) / 8)
+            rospy.set_param('/x_rel_setpoint', (new_rel_setpoint_x + last_center[0] * 5) / 6) #Originaly 2/3, better 4/5
+            rospy.set_param('/y_rel_setpoint', (new_rel_setpoint_y + last_center[1] * 5) / 6)
             rospy.set_param('/yaw_rel_setpoint', new_rel_setpoint_yaw)
         else:
             rospy.set_param('/x_rel_setpoint', new_rel_setpoint_x)
@@ -164,21 +164,21 @@ if __name__ == '__main__':
     time.sleep(2) # Pause 
     rospy.loginfo("Move to pre-dock")
     initial_center = center_on_dock(interpolate=True)
-    #rospy.set_param('/control_gains/p', 7)
-    #rospy.set_param('/control_gains/d', 2)
+    rospy.set_param('/control_gains/p', 3)
+    rospy.set_param('/control_gains/d', 1)
     time.sleep(2) # Pause 
     # Hold position over april tag for 5 seconds
     last_center = (0.0,0.0)
-    for _ in range(40):#was 5
+    for _ in range(3):#was 5
         initial_center = center_on_dock(last_center=initial_center) 
-        if ((last_center[0] - initial_center[0] < 0.15) and
-            (last_center[1] - initial_center[1] < 0.15) and
-            (-0.2 < initial_center[0] < 0.2) and (-0.2 < initial_center[1] < 0.2) and
-            last_center != initial_center):
-            rospy.loginfo(" ##### Consistent Measurements!  Landing now! #####")
-            break
+       # if ((last_center[0] - initial_center[0] < 0.15) and
+       #    (last_center[1] - initial_center[1] < 0.15) and
+       #    (-0.2 < initial_center[0] < 0.2) and (-0.2 < initial_center[1] < 0.2) and
+       #     last_center != initial_center):
+       #     rospy.loginfo(" ##### Consistent Measurements!  Landing now! #####")
+       #     break
         last_center = initial_center
-        time.sleep(0.25)
+        time.sleep(0.5)
 
     rospy.loginfo("!!!!!!!!Land!!!!!!!!\n")
     rospy.set_param('/land_now', 1)
