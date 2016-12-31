@@ -69,7 +69,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   mavros_msgs#   std_msgs
+#   geometry_msgs   mavros_msgs   std_msgs
 # )
 
 ################################################
@@ -103,8 +103,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES column
-#  CATKIN_DEPENDS geometry_msgs mavros_msgs roscpp rospy std_msgs
+  LIBRARIES column
+  CATKIN_DEPENDS geometry_msgs mavros_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -131,18 +131,18 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(column_node src/column_node.cpp)
-add_executable(offb_node src/offb_node.cpp)
+add_executable(local_planner src/local_planner.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(column_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(offb_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(local_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(column_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(offb_node
+target_link_libraries(local_planner
 	${catkin_LIBRARIES}
 )
 #############
