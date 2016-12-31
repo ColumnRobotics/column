@@ -13,8 +13,6 @@ from mavros_msgs.msg import State
 from geometry_msgs.msg import Pose
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
-import mavros 
-import subprocess
 
 
 def command_path_xy(start_setpoint, end_setpoint, speed_mps=1.0):

@@ -23,9 +23,4 @@ rosrun april_tag cole_node &
 sleep 1
 
 roslaunch column bt_planner.launch
-
-#sleep 1 
-
-#rosrun column cone_script.py &
-#rosrun column tag_check.py &
  
